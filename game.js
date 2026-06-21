@@ -21,7 +21,7 @@
   const CHARACTERS = [
     { id: 'meeks',   name: 'BIG MEEKS', skin: '#5c3a1e', hair: '#1a0800', shirt: '#cc2200', accent: '#ffd43b', shorts: '#1d4ed8', trackMult: 0.85, reachMult: 0.9, chaosMult: 1.15 },
     { id: 'alan',    name: 'ALAN',      skin: '#f4c28b', hair: null,      shirt: '#111111', accent: '#eeeeee', shorts: '#111111', trackMult: 1.0, reachMult: 1.0, chaosMult: 1.0 },
-    { id: 'thierry', name: 'THIERRY',   skin: '#6b3420', hair: null,      shirt: '#cc0000', accent: '#ffffff', shorts: '#ffffff', trackMult: 1.15, reachMult: 1.1, chaosMult: 0.85 },
+    { id: 'thierry', name: 'THIERRY',   skin: '#6b3420', hair: null,      shirt: '#1e293b', accent: '#ffffff', shorts: '#1e293b', trackMult: 1.15, reachMult: 1.1, chaosMult: 0.85 },
     { id: 'lineker', name: 'LINEKER',   skin: '#f0c080', hair: '#aaaaaa', shirt: '#0033cc', accent: '#ffffff', shorts: '#0033cc', trackMult: 1.0, reachMult: 1.0, chaosMult: 1.0 },
     { id: 'zlatan',  name: 'ZLATAN',    skin: '#c88848', hair: '#2a1000', shirt: '#000080', accent: '#ffcc00', shorts: '#000080', trackMult: 1.0, reachMult: 1.0, chaosMult: 1.0 },
   ];
@@ -673,16 +673,28 @@
       ctx.fillStyle = '#ffd43b';
       ctx.fillRect(cx + 7 * face, cy - 39 + bob, 3, 3);
     } else if (char.id === 'thierry') {
-      // Arsenal white sleeves
+      // Thierry smart open-collar designer blazer
+      // White inner collared shirt
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(cx - 27, cy - 41 + bob, 9, 14);
-      ctx.fillRect(cx + 18, cy - 41 + bob, 9, 14);
-      ctx.strokeStyle = '#090a14';
-      ctx.strokeRect(cx - 27, cy - 41 + bob, 9, 14);
-      ctx.strokeRect(cx + 18, cy - 41 + bob, 9, 14);
-      // White collar trim
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, cy - 47 + bob);
+      ctx.lineTo(cx + 5, cy - 47 + bob);
+      ctx.lineTo(cx, cy - 37 + bob);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Exposed chest skin (open collar)
+      ctx.fillStyle = char.skin;
+      ctx.beginPath();
+      ctx.moveTo(cx - 3, cy - 47 + bob);
+      ctx.lineTo(cx + 3, cy - 47 + bob);
+      ctx.lineTo(cx, cy - 42 + bob);
+      ctx.closePath();
+      ctx.fill();
+
+      // White pocket square highlight
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(cx - 7, cy - 47 + bob, 14, 3);
+      ctx.fillRect(cx - 10, cy - 38 + bob, 3, 2);
     } else if (char.id === 'meeks') {
       // Micah Richards Pundit Suit (3-piece grey suit with V-cut lapels)
       ctx.fillStyle = '#374151'; // Darker grey suit lapels
@@ -932,23 +944,7 @@
       ctx.moveTo(hx + 2, hy - 1); ctx.lineTo(hx + 9, hy - 2);
       ctx.moveTo(hx + 2, hy - 1); ctx.lineTo(hx + 9, hy);
       ctx.stroke();
-    } else if (char.id === 'thierry') {
-      // Thierry quizzical eye shapes (left round/high, right squint/lower)
-      ctx.fillStyle = '#ffffff';
-      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-      ctx.lineWidth = 1;
-      
-      // Left eye white (round & high)
-      ctx.beginPath();
-      ctx.arc(hx - 5, hy - 2, 4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
 
-      // Right eye white (ellipse & lower)
-      ctx.beginPath();
-      ctx.ellipse(hx + 5, hy - 1, 3.5, 2.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
     } else {
       // Standard circular eyes
       ctx.fillStyle = '#ffffff';
@@ -999,12 +995,9 @@
       ctx.stroke();
     } else if (char.id === 'thierry') {
       ctx.beginPath();
-      // Quizzical left eyebrow (arched and high)
-      ctx.moveTo(hx - 9, hy - 8);
-      ctx.quadraticCurveTo(hx - 5, hy - 10, hx - 1, hy - 6);
-      // Normal right eyebrow (low and flat)
-      ctx.moveTo(hx + 2, hy - 5);
-      ctx.lineTo(hx + 8, hy - 5);
+      // Sleek, stylish symmetrical eyebrows
+      ctx.moveTo(hx - 8, hy - 5); ctx.lineTo(hx - 2, hy - 5);
+      ctx.moveTo(hx + 2, hy - 5); ctx.lineTo(hx + 8, hy - 5);
       ctx.stroke();
     } else if (char.id === 'alan') {
       // Serious, furrowed eyebrows slanting down in the middle
