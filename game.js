@@ -208,13 +208,13 @@
 
     // Auto-tracking logic (no manual horizontal steering)
     const trackMult = selectedChar.trackMult ?? 1.0;
-    const autoStep = Math.max(24, 120 - level * 7) * trackMult * dt;
+    const autoStep = Math.max(30, 120 - level * 3.5) * trackMult * dt;
     const dx = (ball.x + player.wander) - player.x;
     player.x += Math.sign(dx) * Math.min(Math.abs(dx), autoStep);
     player.x = clamp(player.x, 45, W - 45);
     player.shuffle += dt * 3.5;
 
-    const gravity = 400 + level * 47;
+    const gravity = 400 + level * 15;
     ball.vy += gravity * dt;
 
     // Erratic knuckleball movement as game progresses (level >= 2)
