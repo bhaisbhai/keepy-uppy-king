@@ -1270,12 +1270,15 @@
   function drawInstructions() {
     panel(20, 100, W - 40, 440);
     
-    pixelText('HOW TO PLAY', W/2 - textWidth('HOW TO PLAY', 20)/2, 160, 20, '#ffd43b');
+    // BACK button at the top-left of the panel
+    addButton('BACK', 35, 115, 60, 28, () => { state = 'menu'; });
     
-    pixelText('TAP OR SPACE TO KICK', W/2 - textWidth('TAP OR SPACE TO KICK', 12)/2, 220, 12, '#41f8ff');
+    pixelText('HOW TO PLAY', W/2 - textWidth('HOW TO PLAY', 20)/2, 175, 20, '#ffd43b');
+    
+    pixelText('TAP OR SPACE TO KICK', W/2 - textWidth('TAP OR SPACE TO KICK', 12)/2, 225, 12, '#41f8ff');
     
     const listX = W/2 - 65;
-    let y = 280;
+    let y = 285;
     const size = 14;
     const spacing = 28;
     
@@ -1284,10 +1287,14 @@
     pixelText('FOOT:    3 PTS', listX, y, size, '#ffd43b'); y += spacing;
     pixelText('PERFECT: 5 PTS', listX, y, size, '#65ff7a');
     
-    addButton('BACK', W/2 - 50, 470, 100, 40, () => { state = 'menu'; });
+    // Bottom tip text in the freed space
+    pixelText('MOVE WITH ARROWS OR TAP SIDES', W/2 - textWidth('MOVE WITH ARROWS OR TAP SIDES', 8)/2, 480, 8, '#94a3b8');
   }
 
   function drawCharSelect() {
+    // BACK button at the top-left of the screen
+    addButton('BACK', 15, 20, 60, 28, () => { state = 'menu'; });
+
     pixelText('CHOOSE YOUR', W/2-textWidth('CHOOSE YOUR',13)/2, 51, 13, '#ffffff');
     pixelText('PUNDIT', W/2-textWidth('PUNDIT',23)/2, 80, 23, '#ffd43b');
 
