@@ -114,8 +114,9 @@
 
     const manual = (keys.left ? -1 : 0) + (keys.right ? 1 : 0);
     player.x += manual * 173 * dt;
-    const autoSpeed = Math.max(24, 120 - level * 7);
-    player.x += clamp(ball.x - player.x, -1, 1) * autoSpeed * dt;
+    const autoStep = Math.max(24, 120 - level * 7) * dt;
+    const dx = ball.x - player.x;
+    player.x += Math.sign(dx) * Math.min(Math.abs(dx), autoStep);
     player.x = clamp(player.x, 45, W - 45);
     player.shuffle += dt * 3.5;
 
