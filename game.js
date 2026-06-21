@@ -120,15 +120,15 @@
     player.x = clamp(player.x, 45, W - 45);
     player.shuffle += dt * 3.5;
 
-    const gravity = 373 + level * 32;
+    const gravity = 400 + level * 47;
     ball.vy += gravity * dt;
     ball.x += ball.vx * dt;
     ball.y += ball.vy * dt;
     ball.spin += ball.vx * dt * 0.04;
     ball.vx *= (0.994 - Math.min(0.003, level * 0.00012));
 
-    if (ball.x < 19) { ball.x = 19; ball.vx = Math.abs(ball.vx) * 0.82; }
-    if (ball.x > W - 19) { ball.x = W - 19; ball.vx = -Math.abs(ball.vx) * 0.82; }
+    if (ball.x < 19) { ball.x = 19; ball.vx = Math.abs(ball.vx) * 0.62; }
+    if (ball.x > W - 19) { ball.x = W - 19; ball.vx = -Math.abs(ball.vx) * 0.62; }
     if (ball.y + ball.r >= GROUND_Y) {
       ball.y = GROUND_Y - ball.r;
       burst(ball.x, ball.y, '#ff4b4b', 18);
