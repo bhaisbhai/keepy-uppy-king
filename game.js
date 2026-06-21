@@ -48,7 +48,7 @@
     level = 1; earnedCoins = 0; unlockedMessage = '';
     player = { x: W / 2, y: PLAYER_Y, leg: 0, face: 1, shuffle: 0,
                wander: 0, wanderTarget: 0, wanderTimer: 0, hasTap: true };
-    ball = { x: W / 2 + 2, y: 387, vx: 8, vy: 16, r: 11, spin: 0, canKick: true };
+    ball = { x: W / 2 + 2, y: 387, vx: 8, vy: 16, r: 11, spin: 0, canKick: true, wobblePhase: 0 };
     particles = []; floatTexts = []; shake = 0; shakePhase = 0;
   }
 
@@ -65,48 +65,99 @@
   function tryKick() {
     if (state !== 'playing') return;
     if (!player.hasTap) return; // Only allow one tap attempt per bounce
+    if (!ball.canKick) return;  // Make sure ball can be kicked
     
     player.hasTap = false; // Consume tap immediately
     
+    const headY = PLAYER_Y - 69;
+    const kneeY = PLAYER_Y - 44;
     const footY = PLAYER_Y - 24;
-    const dy = Math.abs(ball.y - footY);
     const dx = Math.abs(ball.x - player.x);
-    if (dy >= 48 || dx >= 56 || ball.vy <= -133) {
-      // Trigger whiff animation and face the ball
+    
+    let touchType = null; // 'header', 'knee', 'volley', 'perfect_volley'
+    let gainedPoints = 0;
+    let bounceVy = 0;
+    
+    // Determine which zone the ball is in vertically
+    if (ball.y < PLAYER_Y - 56) {
+      // HEADER ZONE
+      const dy = Math.abs(ball.y - headY);
+      if (dy < 22 && dx < 32 && ball.vy > -133) {
+        touchType = 'header';
+        gainedPoints = 1;
+        bounceVy = -230 - Math.min(40, level * 2);
+      }
+    } else if (ball.y >= PLAYER_Y - 56 && ball.y < PLAYER_Y - 34) {
+      // KNEE ZONE
+      const dy = Math.abs(ball.y - kneeY);
+      if (dy < 14 && dx < 45 && ball.vy > -133) {
+        touchType = 'knee';
+        gainedPoints = 2;
+        bounceVy = -310 - Math.min(50, level * 2.5);
+      }
+    } else {
+      // VOLLEY / FOOT ZONE
+      const dy = Math.abs(ball.y - footY);
+      if (dy < 18 && dx < 56 && ball.vy > -133) {
+        const isPerfect = dy < 10 && dx < 27 && ball.vy > 0;
+        touchType = isPerfect ? 'perfect_volley' : 'volley';
+        gainedPoints = isPerfect ? 5 : 3;
+        bounceVy = isPerfect ? -430 - Math.min(60, level * 3) : -375 - Math.min(45, level * 3);
+      }
+    }
+    
+    if (!touchType) {
+      // WHIFF!
       const side = Math.sign(ball.x - player.x) || player.face;
       player.leg = 8;
       player.face = side;
-      addFloatText(ball.y < footY ? 'TOO EARLY!' : 'REACH!', player.x, PLAYER_Y - 73, '#ff6b6b');
+      
+      let whiffMsg = 'REACH!';
+      if (ball.y < headY - 15) whiffMsg = 'TOO EARLY!';
+      else if (ball.y > footY + 15) whiffMsg = 'TOO LATE!';
+      
+      addFloatText(whiffMsg, player.x, PLAYER_Y - 73, '#ff6b6b');
       return;
     }
-    if (!ball.canKick) return;
+    
+    // Success! Lock the kick and refund the tap
     ball.canKick = false;
+    player.hasTap = true;
     
-    player.hasTap = true; // Refund tap on successful kick
-    
-    const perfect = dy < 12 && dx < 27 && ball.vy > 0;
     const combo = getCombo();
-    const gained = (perfect ? 3 : 1) * combo;
-    score += gained; streak++;
+    const gained = gainedPoints * combo;
+    score += gained;
+    streak++;
     bestRunCombo = Math.max(bestRunCombo, combo);
     level = 1 + Math.floor(score / 5);
-    if (perfect) perfects++;
-
+    
     const side = Math.sign(ball.x - player.x) || (Math.random() > 0.5 ? 1 : -1);
     const chaos = Math.min(133, level * 9);
-    ball.vy = perfect ? -420 - Math.min(60, level * 3) : -380 - Math.min(47, level * 3);
+    
+    ball.vy = bounceVy;
     ball.vx += side * (8 + Math.random() * 13) + (Math.random() - 0.5) * chaos;
     ball.vx = clamp(ball.vx, -147 - level * 4, 147 + level * 4);
-    ball.y = Math.min(ball.y, footY - 1);
-    player.leg = 8; player.face = side;
-    if (perfect) { shake = 1.5; shakePhase = 0; }
-
-    if (perfect) {
-      addFloatText(`PERFECT +${gained}`, ball.x, ball.y - 13, '#65ff7a');
-      burst(ball.x, ball.y, '#65ff7a', 14);
-    } else {
-      addFloatText(`+${gained}`, ball.x, ball.y - 13, '#ffffff');
-      burst(ball.x, ball.y, '#ffd43b', 7);
+    
+    // Set animations based on touch type
+    player.face = side;
+    if (touchType === 'header') {
+      player.leg = -5; // head nod animation
+      addFloatText(`HEADER! +${gained}`, ball.x, ball.y - 13, '#60a5fa');
+      burst(ball.x, ball.y, '#60a5fa', 5);
+    } else if (touchType === 'knee') {
+      player.leg = 4; // knee raise animation
+      addFloatText(`KNEE-UP! +${gained}`, ball.x, ball.y - 13, '#fb923c');
+      burst(ball.x, ball.y, '#fb923c', 7);
+    } else if (touchType === 'perfect_volley') {
+      perfects++;
+      player.leg = 8; // full kick
+      shake = 1.5; shakePhase = 0;
+      addFloatText(`PERFECT! +${gained}`, ball.x, ball.y - 13, '#65ff7a');
+      burst(ball.x, ball.y, '#65ff7a', 15);
+    } else { // normal volley
+      player.leg = 8;
+      addFloatText(`VOLLEY! +${gained}`, ball.x, ball.y - 13, '#ffffff');
+      burst(ball.x, ball.y, '#ffd43b', 8);
     }
   }
 
@@ -124,9 +175,11 @@
     updateEffects(dt);
     if (state !== 'playing') return;
     if (shake > 0) { shake -= dt * 25; shakePhase += dt * 35; }
-    if (player.leg > 0) player.leg -= dt * 16;
-    // Unlock kick once ball has risen at least 100px above foot level
-    if (!ball.canKick && ball.y < PLAYER_Y - 100) ball.canKick = true;
+    if (player.leg > 0) player.leg = Math.max(0, player.leg - dt * 16);
+    if (player.leg < 0) player.leg = Math.min(0, player.leg + dt * 16);
+    
+    // Re-enable kicking as soon as the ball starts falling
+    if (ball.vy > 0) ball.canKick = true;
 
     // Wander: smoothly drift toward a random offset, changing target every 0.5-1.3s
     player.wanderTimer -= dt;
@@ -145,6 +198,24 @@
 
     const gravity = 400 + level * 47;
     ball.vy += gravity * dt;
+
+    // Erratic knuckleball movement as game progresses (level >= 2)
+    if (ball.vy > 0 && level >= 2) {
+      const wobbleFreq = 6 + level * 0.5;
+      const wobbleAmpX = Math.min(25, level * 3);
+      const wobbleAmpY = Math.min(18, level * 2.2);
+      
+      ball.wobblePhase += dt * wobbleFreq;
+      ball.vx += Math.sin(ball.wobblePhase) * wobbleAmpX * dt;
+      ball.vy += Math.cos(ball.wobblePhase * 1.35) * wobbleAmpY * dt;
+
+      // Add a bit of random wind gust turbulence at level 3+
+      if (level >= 3) {
+        ball.vx += (Math.random() - 0.5) * level * 4 * dt;
+        ball.vy += (Math.random() - 0.5) * level * 3 * dt;
+      }
+    }
+
     ball.x += ball.vx * dt;
     ball.y += ball.vy * dt;
     ball.spin += ball.vx * dt * 0.04;
@@ -330,7 +401,7 @@
 
     // 1. Draw Legs
     ctx.fillStyle = char.skin;
-    const legOffset = Math.round(leg);
+    const legOffset = Math.round(Math.max(0, leg));
     const lx = Math.round(legOffset * 0.9);
     const ly = Math.round(legOffset * 0.5);
     const lh = Math.round(legOffset * 0.7);
@@ -378,11 +449,16 @@
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(cx - 11, cy - 47 + bob, 5, 35);
       ctx.fillRect(cx + 6, cy - 47 + bob, 5, 35);
+      // Gold crest/star on Newcastle shirt
+      ctx.fillStyle = '#ffd43b';
+      ctx.fillRect(cx + 6 * face, cy - 39 + bob, 3, 3);
     } else if (char.id === 'thierry') {
       // Arsenal white sleeves
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(cx - 27, cy - 41 + bob, 9, 14);
       ctx.fillRect(cx + 18, cy - 41 + bob, 9, 14);
+      // White collar trim
+      ctx.fillRect(cx - 7, cy - 47 + bob, 14, 3);
     } else if (char.id === 'meeks') {
       // Pundit suit (Micah Richards)
       ctx.fillStyle = '#ffffff'; // White shirt V-collar
@@ -413,6 +489,9 @@
       ctx.lineTo(cx, cy - 41 + bob);
       ctx.closePath();
       ctx.fill();
+      // England blue crest on chest
+      ctx.fillStyle = '#0033cc';
+      ctx.fillRect(cx + 6 * face, cy - 39 + bob, 3, 4);
     }
 
     // 4. Neck
@@ -421,22 +500,58 @@
 
     // 5. Head
     const hx = cx;
-    const hy = cy - 69 + bob;
+    const headNod = leg < 0 ? -leg * 1.5 : 0;
+    const hy = cy - 69 + bob + headNod;
     
+    ctx.fillStyle = char.skin;
     ctx.beginPath();
     ctx.arc(hx, hy, 14, 0, Math.PI * 2);
     ctx.fill();
 
     // Gary Lineker big ears
     if (char.id === 'lineker') {
+      ctx.fillStyle = char.skin;
       ctx.beginPath();
       ctx.arc(hx - 15, hy, 4.5, 0, Math.PI * 2);
       ctx.arc(hx + 15, hy, 4.5, 0, Math.PI * 2);
       ctx.fill();
+      // Inner ear fold shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.beginPath();
+      ctx.arc(hx - 15, hy, 2, 0, Math.PI * 2);
+      ctx.arc(hx + 15, hy, 2, 0, Math.PI * 2);
+      ctx.fill();
     } else {
+      ctx.fillStyle = char.skin;
       ctx.beginPath();
       ctx.arc(hx - 14, hy, 2.5, 0, Math.PI * 2);
       ctx.arc(hx + 14, hy, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Zlatan's prominent pointed nose or general nose shape for others
+    if (char.id === 'zlatan') {
+      ctx.fillStyle = char.skin;
+      ctx.beginPath();
+      ctx.moveTo(hx + 11 * face, hy - 3);
+      ctx.lineTo(hx + 16 * face, hy + 1);
+      ctx.lineTo(hx + 11 * face, hy + 4);
+      ctx.closePath();
+      ctx.fill();
+      // Nose shadow/outline
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+      ctx.fillRect(hx + 10 * face, hy + 1, 2, 2);
+    } else {
+      // General subtle nose shape
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      ctx.fillRect(hx + 11 * face, hy + 1, 2, 2);
+    }
+
+    // Alan Shearer shiny bald glare
+    if (char.id === 'alan') {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.beginPath();
+      ctx.ellipse(hx + 4, hy - 8, 6, 3, Math.PI / 4, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -449,45 +564,70 @@
       ctx.fill();
       ctx.fillRect(hx - 14, hy - 6, 28, 6);
       
+      // Side fade stubble
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.fillRect(hx - 14, hy - 1, 2, 6);
+      ctx.fillRect(hx + 12, hy - 1, 2, 6);
+      
       // Micah Beard
+      ctx.fillStyle = '#1a0800';
       ctx.fillRect(hx - 11, hy + 7, 22, 5);
       ctx.fillRect(hx - 7, hy + 11, 14, 3);
     } else if (char.id === 'zlatan') {
-      // Zlatan dark hair + ponytail man-bun
+      // Zlatan dark hair + ponytail man-bun (at the BACK of the head)
       ctx.fillStyle = '#2a1000';
       ctx.beginPath();
       ctx.arc(hx, hy - 4, 14.2, Math.PI, 0);
       ctx.fill();
+      
+      // Hair tie (red)
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(hx - 12 * face - 1, hy - 7, 3, 5);
+      
+      // Ponytail bun
+      ctx.fillStyle = '#2a1000';
       ctx.beginPath();
-      ctx.arc(hx + 11 * face, hy - 11, 4.5, 0, Math.PI * 2);
+      ctx.arc(hx - 14 * face, hy - 5, 4.5, 0, Math.PI * 2);
       ctx.fill();
       
-      // Zlatan Goatee/Mustache
-      ctx.fillRect(hx - 8, hy + 5, 16, 2);
-      ctx.fillRect(hx - 3, hy + 7, 6, 6);
+      // Zlatan Goatee/Mustache with curled tips
+      ctx.fillStyle = '#2a1000';
+      ctx.fillRect(hx - 8, hy + 5, 16, 2); // mustache
+      ctx.fillRect(hx - 9, hy + 4, 2, 2);  // left curl tip
+      ctx.fillRect(hx + 7, hy + 4, 2, 2);  // right curl tip
+      ctx.fillRect(hx - 3, hy + 7, 6, 6);  // chin goatee
     } else if (char.id === 'lineker') {
       // Lineker silver-grey styled hair
-      ctx.fillStyle = '#cccccc';
+      ctx.fillStyle = '#b5b5b5'; // Base silver-grey
       ctx.beginPath();
       ctx.arc(hx, hy - 4, 14.5, Math.PI * 1.05, Math.PI * 1.95);
       ctx.fill();
       ctx.fillRect(hx - 14, hy - 6, 2, 7);
       ctx.fillRect(hx + 12, hy - 6, 2, 7);
       
+      // Bright highlights
+      ctx.fillStyle = '#f5f5f5';
+      ctx.fillRect(hx - 8, hy - 14, 5, 2);
+      ctx.fillRect(hx + 3, hy - 13, 5, 2);
+      ctx.fillRect(hx - 4, hy - 16, 7, 2);
+      
       // Grey stubble
-      ctx.fillStyle = '#b0b0b0';
-      ctx.fillRect(hx - 6, hy + 11, 12, 2);
+      ctx.fillStyle = '#a0a0a0';
+      ctx.fillRect(hx - 8, hy + 7, 16, 4);
+      ctx.fillStyle = '#808080';
+      ctx.fillRect(hx - 5, hy + 11, 10, 2);
     } else if (char.id === 'thierry') {
-      // Thierry detailed goatee
-      ctx.fillStyle = '#22110c';
-      ctx.fillRect(hx - 9, hy + 6, 18, 2);
-      ctx.fillRect(hx - 3, hy + 8, 6, 6);
-      ctx.fillRect(hx - 7, hy + 10, 14, 2);
+      // Thierry detailed thin goatee and mustache
+      ctx.fillStyle = '#110906';
+      ctx.fillRect(hx - 8, hy + 5, 16, 1.5); // Mustache
+      ctx.fillRect(hx - 2, hy + 7, 4, 7);   // Chin strip
+      ctx.fillRect(hx - 7, hy + 6, 1.5, 4);  // Left connector
+      ctx.fillRect(hx + 5.5, hy + 6, 1.5, 4); // Right connector
     } else if (char.id === 'alan') {
       // Alan Shearer side stubble shadow
-      ctx.fillStyle = '#d0b090';
-      ctx.fillRect(hx - 14, hy - 2, 2, 5);
-      ctx.fillRect(hx + 12, hy - 2, 2, 5);
+      ctx.fillStyle = '#c5a382';
+      ctx.fillRect(hx - 14, hy - 2, 2, 6);
+      ctx.fillRect(hx + 12, hy - 2, 2, 6);
     }
 
     // 7. Cartoon Eyes (Whites)
@@ -536,8 +676,18 @@
       ctx.stroke();
     } else if (char.id === 'thierry') {
       ctx.beginPath();
-      ctx.moveTo(hx - 8, hy - 5); ctx.lineTo(hx - 3, hy - 6);
-      ctx.moveTo(hx + 3, hy - 4); ctx.lineTo(hx + 8, hy - 6);
+      // Quizzical left eyebrow (arched and high)
+      ctx.moveTo(hx - 8, hy - 7);
+      ctx.quadraticCurveTo(hx - 5, hy - 9, hx - 2, hy - 6);
+      // Normal right eyebrow (low and flat)
+      ctx.moveTo(hx + 2, hy - 5);
+      ctx.lineTo(hx + 7, hy - 5);
+      ctx.stroke();
+    } else if (char.id === 'alan') {
+      // Serious, furrowed eyebrows slanting down in the middle
+      ctx.beginPath();
+      ctx.moveTo(hx - 8, hy - 4); ctx.lineTo(hx - 3, hy - 6);
+      ctx.moveTo(hx + 3, hy - 6); ctx.lineTo(hx + 8, hy - 4);
       ctx.stroke();
     } else {
       ctx.beginPath();
@@ -548,17 +698,16 @@
 
     // 10. Mouths
     if (char.id === 'meeks') {
-      // Micah Richards legendary wide laugh
-      ctx.fillStyle = '#ffffff';
-      ctx.strokeStyle = '#5a1200';
-      ctx.lineWidth = 1;
+      // Micah Richards legendary wide laugh (dark red mouth cavity with white teeth bevel)
+      ctx.fillStyle = '#4a0800'; // Dark red mouth interior
       ctx.beginPath();
-      ctx.arc(hx, hy + 5, 5, 0, Math.PI);
+      ctx.arc(hx, hy + 5, 5.5, 0, Math.PI);
       ctx.closePath();
       ctx.fill();
-      ctx.stroke();
+      
+      // White teeth
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(hx - 3, hy + 4, 6, 1);
+      ctx.fillRect(hx - 4, hy + 4, 8, 2);
     } else if (char.id === 'alan') {
       // Alan deadpan straight mouth
       ctx.strokeStyle = '#111827';
@@ -602,6 +751,11 @@
       ctx.moveTo(hx - 3, hy - 1);
       ctx.lineTo(hx + 3, hy - 1);
       ctx.stroke();
+      
+      // Light blue lens reflection
+      ctx.fillStyle = 'rgba(65, 248, 255, 0.4)';
+      ctx.fillRect(hx - 8, hy - 2, 4, 2);
+      ctx.fillRect(hx + 4, hy - 2, 4, 2);
     }
 
     ctx.restore();
@@ -611,7 +765,7 @@
     const px = Math.round(x);
     const py = Math.round(y);
     const bob = Math.round(Math.sin(player.shuffle) * 1.5);
-    const leg = Math.round(Math.max(0, player.leg));
+    const leg = Math.round(player.leg);
     const face = player.face;
     
     drawPundit(px, py, char, bob, leg, face, ball.x, ball.y);
@@ -619,6 +773,31 @@
 
   function drawBall(x, y) {
     const r = ball.r;
+    
+    // Premium Knuckleball trail ripples
+    if (level >= 2 && ball.vy > 0 && state === 'playing') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(65, 248, 255, 0.28)';
+      ctx.lineWidth = 1.5;
+      
+      // Ripple 1
+      const rx1 = x - Math.sin(ball.wobblePhase - 0.4) * 5;
+      const ry1 = y - ball.vy * 0.04;
+      ctx.beginPath();
+      ctx.arc(rx1, ry1, r + 2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Ripple 2
+      ctx.strokeStyle = 'rgba(65, 248, 255, 0.12)';
+      const rx2 = x - Math.sin(ball.wobblePhase - 0.8) * 9;
+      const ry2 = y - ball.vy * 0.08;
+      ctx.beginPath();
+      ctx.arc(rx2, ry2, r + 4, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+
     ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(Math.round(x-15), Math.round(GROUND_Y+3), 29, 5);
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(Math.round(x-r), Math.round(y-r+3), r*2, r*2-6);
