@@ -7,6 +7,8 @@
   const H = canvas.height;
   const GROUND_Y = 230;
   const PLAYER_Y = 216;
+  const ZOOM = 1.4;
+  const CAM_Y = 148;
 
   const TEAM_FLAGS = [
     { id: 'ENG', name: 'England', colours: ['#ffffff', '#d91e36'] },
@@ -159,11 +161,11 @@
     score += gained;
     streak += 1;
     bestRunCombo = Math.max(bestRunCombo, combo);
-    level = 1 + Math.floor(score / 10);
+    level = 1 + Math.floor(score / 5);
     if (perfect) perfects += 1;
 
     const side = Math.sign(ball.x - player.x) || (Math.random() > 0.5 ? 1 : -1);
-    const chaos = Math.min(70, level * 4);
+    const chaos = Math.min(120, level * 8);
     ball.vy = perfect ? -242 - Math.min(38, level * 2) : -218 - Math.min(28, level * 1.6);
     ball.vx += side * (8 + Math.random() * 12) + (Math.random() - 0.5) * chaos;
     ball.vx = clamp(ball.vx, -125 - level * 3, 125 + level * 3);
@@ -219,13 +221,13 @@
 
     const manual = (keys.left ? -1 : 0) + (keys.right ? 1 : 0);
     player.x += manual * 125 * dt;
-    const autoSpeed = Math.max(48, 96 - level * 2.2);
+    const autoSpeed = Math.max(20, 96 - level * 5);
     const toBall = clamp(ball.x - player.x, -1, 1);
     player.x += toBall * autoSpeed * dt;
     player.x = clamp(player.x, 44, W - 44);
     player.shuffle += dt * (6 + level * 0.3);
 
-    const gravity = 390 + level * 18;
+    const gravity = 390 + level * 28;
     ball.vy += gravity * dt;
     ball.x += ball.vx * dt;
     ball.y += ball.vy * dt;
@@ -256,13 +258,29 @@
     ctx.save();
     ctx.translate(Math.round((Math.random() - 0.5) * Math.max(0, shake)), Math.round((Math.random() - 0.5) * Math.max(0, shake)));
 
-    drawBackground();
-    if (state === 'menu') drawMenu();
-    if (state === 'shop') drawShop();
-    if (state === 'playing') drawPlaying();
-    if (state === 'gameover') drawPlaying(true), drawGameOver();
-
-    drawEffects();
+    if (state === 'playing' || state === 'gameover') {
+      ctx.save();
+      ctx.translate(W / 2, H / 2);
+      ctx.scale(ZOOM, ZOOM);
+      ctx.translate(-W / 2, -CAM_Y);
+      drawBackground();
+      drawPlayer(player.x, player.y, selectedTeam());
+      drawBall(ball.x, ball.y, selectedSkin());
+      drawKickZone();
+      drawEffects();
+      ctx.restore();
+      drawHud();
+      if (state === 'playing') {
+        const hint = streak === 0 ? 'TAP WHEN BALL REACHES FOOT!' : 'KEEP IT UP!';
+        pixelText(hint, W / 2 - textWidth(hint, 7) / 2, 262, 7, '#ffffff');
+      }
+      if (state === 'gameover') drawGameOver();
+    } else {
+      drawBackground();
+      if (state === 'menu') drawMenu();
+      if (state === 'shop') drawShop();
+      drawEffects();
+    }
     if (unlockedTimer > 0) drawToast(unlockedMessage);
     ctx.restore();
   }
