@@ -117,7 +117,7 @@
     const autoSpeed = Math.max(24, 120 - level * 7);
     player.x += clamp(ball.x - player.x, -1, 1) * autoSpeed * dt;
     player.x = clamp(player.x, 45, W - 45);
-    player.shuffle += dt * (8 + level * 0.4);
+    player.shuffle += dt * 3.5;
 
     const gravity = 373 + level * 32;
     ball.vy += gravity * dt;
@@ -215,7 +215,9 @@
   }
 
   function drawPlayer(x, y, char) {
-    const bob = Math.sin(player.shuffle) * 1.6;
+    x = Math.round(x);
+    y = Math.round(y);
+    const bob = Math.round(Math.sin(player.shuffle));
     const leg = Math.max(0, player.leg);
     ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(x-24, y+19+bob, 48, 7);
     // Legs
