@@ -179,7 +179,6 @@
     if (state === 'playing' || state === 'gameover') {
       drawPlayer(player.x, player.y, selectedChar);
       drawBall(ball.x, ball.y);
-      drawKickZone();
       drawEffects();
       drawHud();
       if (state === 'playing') {
