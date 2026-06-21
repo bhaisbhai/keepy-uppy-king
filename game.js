@@ -210,70 +210,63 @@
 
   function drawKickZone() {
     const footY = PLAYER_Y - 24;
+    const px = Math.round(player.x);
     ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.lineWidth = 1;
-    ctx.setLineDash([4,4]); ctx.strokeRect(player.x-53,footY-48,107,96); ctx.setLineDash([]);
+    ctx.setLineDash([4,4]); ctx.strokeRect(px-53,footY-48,107,96); ctx.setLineDash([]);
   }
 
   function drawPlayer(x, y, char) {
-    x = Math.round(x);
-    y = Math.round(y);
+    const px  = Math.round(x);
+    const py  = Math.round(y);
     const bob = Math.round(Math.sin(player.shuffle));
-    const leg = Math.max(0, player.leg);
-    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(x-24, y+19+bob, 48, 7);
-    // Legs
+    const leg = Math.round(Math.max(0, player.leg));
+    const lx  = Math.round(leg * 0.9);
+    const ly  = Math.round(leg * 0.5);
+    const lh  = Math.round(leg * 0.7);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(px-24, py+19+bob, 48, 7);
     ctx.fillStyle = char.skin;
-    ctx.fillRect(x-15, y-3+bob, 8, 27);
-    ctx.fillRect(x+7,  y-3+bob-leg*.5, 8+leg*.9, 27-leg*.7);
-    // Boots
+    ctx.fillRect(px-15, py-3+bob,    8,    27);
+    ctx.fillRect(px+7,  py-3+bob-ly, 8+lx, 27-lh);
     ctx.fillStyle = '#111827';
-    ctx.fillRect(x-17, y+23+bob, 15, 7);
-    ctx.fillRect(x+12+leg*.9, y+19+bob-leg*.7, 17, 7);
-    // Shorts
-    ctx.fillStyle = char.shorts; ctx.fillRect(x-17, y-15+bob, 36, 19);
-    // Shirt
-    ctx.fillStyle = char.shirt;  ctx.fillRect(x-21, y-48+bob, 43, 36);
-    ctx.fillStyle = char.accent; ctx.fillRect(x-5,  y-48+bob, 10, 36);
-    // Arms
+    ctx.fillRect(px-17,    py+23+bob,    15, 7);
+    ctx.fillRect(px+12+lx, py+19+bob-ly, 17, 7);
+    ctx.fillStyle = char.shorts; ctx.fillRect(px-17, py-15+bob, 36, 19);
+    ctx.fillStyle = char.shirt;  ctx.fillRect(px-21, py-48+bob, 43, 36);
+    ctx.fillStyle = char.accent; ctx.fillRect(px-5,  py-48+bob, 10, 36);
     ctx.fillStyle = char.skin;
-    ctx.fillRect(x-33, y-41+bob, 12, 8);
-    ctx.fillRect(x+21, y-41+bob, 12, 8);
-    // Head
-    ctx.fillRect(x-15, y-73+bob, 29, 27);
-    // Hair per character
+    ctx.fillRect(px-33, py-41+bob, 12, 8);
+    ctx.fillRect(px+21, py-41+bob, 12, 8);
+    ctx.fillRect(px-15, py-73+bob, 29, 27);
     if (char.id === 'meeks') {
-      ctx.fillStyle = '#1a0800';
-      ctx.fillRect(x-15,y-81+bob,29,9);  // full dark hair cap
+      ctx.fillStyle = '#1a0800'; ctx.fillRect(px-15,py-81+bob,29,9);
     } else if (char.id === 'lineker') {
       ctx.fillStyle = '#aaaaaa';
-      ctx.fillRect(x-15,y-81+bob,29,9);
-      ctx.fillRect(x-17,y-75+bob,5,5);
-      ctx.fillRect(x+11,y-75+bob,5,5);
+      ctx.fillRect(px-15,py-81+bob,29,9);
+      ctx.fillRect(px-17,py-75+bob,5,5);
+      ctx.fillRect(px+11,py-75+bob,5,5);
     } else if (char.id === 'zlatan') {
-      ctx.fillStyle = '#2a1000'; ctx.fillRect(x-15,y-80+bob,29,9);
+      ctx.fillStyle = '#2a1000'; ctx.fillRect(px-15,py-80+bob,29,9);
     }
-    // Eyes
     ctx.fillStyle = '#111827';
-    ctx.fillRect(x-7+player.face, y-63+bob, 4, 4);
-    ctx.fillRect(x+3+player.face, y-63+bob, 4, 4);
-    ctx.fillRect(x-1, y-56+bob, 3, 3);
-    ctx.fillRect(x-5, y-51+bob, 11, 3);
-    ctx.fillStyle = '#ff9980'; ctx.fillRect(x-4, y-49+bob, 8, 1);
-    // Glasses for Meeks
+    ctx.fillRect(px-7+player.face, py-63+bob, 4, 4);
+    ctx.fillRect(px+3+player.face, py-63+bob, 4, 4);
+    ctx.fillRect(px-1, py-56+bob, 3, 3);
+    ctx.fillRect(px-5, py-51+bob, 11, 3);
+    ctx.fillStyle = '#ff9980'; ctx.fillRect(px-4, py-49+bob, 8, 1);
     if (char.id === 'meeks') {
       ctx.fillStyle = '#1a1a1a';
-      ctx.fillRect(x-10,y-67+bob,8,2);  ctx.fillRect(x-10,y-60+bob,8,2);
-      ctx.fillRect(x-10,y-67+bob,2,9);  ctx.fillRect(x-3, y-67+bob,2,9);
-      ctx.fillRect(x+2, y-67+bob,8,2);  ctx.fillRect(x+2, y-60+bob,8,2);
-      ctx.fillRect(x+2, y-67+bob,2,9);  ctx.fillRect(x+8, y-67+bob,2,9);
-      ctx.fillRect(x-1, y-64+bob,3,2);
+      ctx.fillRect(px-10,py-67+bob,8,2); ctx.fillRect(px-10,py-60+bob,8,2);
+      ctx.fillRect(px-10,py-67+bob,2,9); ctx.fillRect(px-3, py-67+bob,2,9);
+      ctx.fillRect(px+2, py-67+bob,8,2); ctx.fillRect(px+2, py-60+bob,8,2);
+      ctx.fillRect(px+2, py-67+bob,2,9); ctx.fillRect(px+8, py-67+bob,2,9);
+      ctx.fillRect(px-1, py-64+bob,3,2);
     }
-    // Beard
     if (char.id === 'meeks') {
       ctx.fillStyle = '#1a0800';
-      ctx.fillRect(x-13,y-53+bob,27,5);
-      ctx.fillRect(x-11,y-49+bob,23,3);
+      ctx.fillRect(px-13,py-53+bob,27,5);
+      ctx.fillRect(px-11,py-49+bob,23,3);
     } else if (char.id === 'zlatan') {
-      ctx.fillStyle = '#2a1000'; ctx.fillRect(x-13,y-53+bob,27,4);
+      ctx.fillStyle = '#2a1000'; ctx.fillRect(px-13,py-53+bob,27,4);
     }
   }
 
