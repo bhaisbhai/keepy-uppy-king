@@ -47,7 +47,7 @@
     score = 0; streak = 0; bestRunCombo = 1; perfects = 0;
     level = 1; earnedCoins = 0; unlockedMessage = '';
     player = { x: W / 2, y: PLAYER_Y, leg: 0, face: 1, shuffle: 0,
-               wander: 0, wanderTarget: 0, wanderTimer: 0, kickCooldown: 0 };
+               wander: 0, wanderTarget: 0, wanderTimer: 0, hasTap: true };
     ball = { x: W / 2 + 2, y: 387, vx: 8, vy: 16, r: 11, spin: 0, canKick: true };
     particles = []; floatTexts = []; shake = 0; shakePhase = 0;
   }
@@ -64,9 +64,9 @@
 
   function tryKick() {
     if (state !== 'playing') return;
-    if (player.kickCooldown > 0) return; // Prevent kick attempts during active 0.25s input cooldown
+    if (!player.hasTap) return; // Only allow one tap attempt per bounce
     
-    player.kickCooldown = 0.25; // Apply a 0.25s input cooldown on every attempt
+    player.hasTap = false; // Consume tap immediately
     
     const footY = PLAYER_Y - 24;
     const dy = Math.abs(ball.y - footY);
@@ -81,6 +81,9 @@
     }
     if (!ball.canKick) return;
     ball.canKick = false;
+    
+    player.hasTap = true; // Refund tap on successful kick
+    
     const perfect = dy < 12 && dx < 27 && ball.vy > 0;
     const combo = getCombo();
     const gained = (perfect ? 3 : 1) * combo;
@@ -122,7 +125,6 @@
     if (state !== 'playing') return;
     if (shake > 0) { shake -= dt * 25; shakePhase += dt * 35; }
     if (player.leg > 0) player.leg -= dt * 16;
-    if (player.kickCooldown > 0) player.kickCooldown -= dt;
     // Unlock kick once ball has risen at least 100px above foot level
     if (!ball.canKick && ball.y < PLAYER_Y - 100) ball.canKick = true;
 
