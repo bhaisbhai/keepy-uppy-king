@@ -809,6 +809,7 @@
 
   canvas.addEventListener('pointerdown', handlePointer, {passive:false});
   window.addEventListener('keydown', e => {
+    if (e.repeat) return; // Prevent keydown auto-repeat from triggering multiple taps
     if (e.code==='Space')                        { e.preventDefault(); if(state==='playing') tryKick(); }
     if (e.code==='ArrowLeft' ||e.code==='KeyA')  keys.left=true;
     if (e.code==='ArrowRight'||e.code==='KeyD')  keys.right=true;
