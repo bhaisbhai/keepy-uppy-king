@@ -19,7 +19,7 @@
   const PLAYER_Y = 563;
 
   const CHARACTERS = [
-    { id: 'meeks',   name: 'BIG MEEKS', skin: '#5c3a1e', hair: '#1a0800', shirt: '#cc2200', accent: '#ffd43b', shorts: '#1d4ed8', trackMult: 0.85, reachMult: 0.9, chaosMult: 1.15 },
+    { id: 'meeks',   name: 'BIG MEEKS', skin: '#5c3a1e', hair: '#111827', shirt: '#faf5eb', accent: '#eab308', shorts: '#2d3748', trackMult: 0.85, reachMult: 0.9, chaosMult: 1.15 },
     { id: 'alan',    name: 'ALAN',      skin: '#f4c28b', hair: null,      shirt: '#111111', accent: '#eeeeee', shorts: '#111111', trackMult: 1.0, reachMult: 1.0, chaosMult: 1.0 },
     { id: 'thierry', name: 'THIERRY',   skin: '#6b3420', hair: null,      shirt: '#1e293b', accent: '#ffffff', shorts: '#1e293b', trackMult: 1.15, reachMult: 1.1, chaosMult: 0.85 },
     { id: 'lineker', name: 'LINEKER',   skin: '#f0c080', hair: '#aaaaaa', shirt: '#0033cc', accent: '#ffffff', shorts: '#0033cc', trackMult: 1.0, reachMult: 1.0, chaosMult: 1.0 },
@@ -772,37 +772,39 @@
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(cx - 10, cy - 38 + bob, 3, 2);
     } else if (char.id === 'meeks') {
-      // Micah Richards Pundit Suit (3-piece grey suit with V-cut lapels)
-      ctx.fillStyle = '#374151'; // Darker grey suit lapels
+      // Micah: smart cream open-collar shirt/polo
+      // Draw open V-neck collar revealing chest skin
+      ctx.fillStyle = char.skin;
       ctx.beginPath();
-      ctx.moveTo(cx - 15, cy - 47 + bob);
-      ctx.lineTo(cx - 4, cy - 29 + bob);
-      ctx.lineTo(cx - 19, cy - 29 + bob);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(cx + 15, cy - 47 + bob);
-      ctx.lineTo(cx + 4, cy - 29 + bob);
-      ctx.lineTo(cx + 19, cy - 29 + bob);
-      ctx.fill();
-
-      // White inner collared shirt
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.moveTo(cx - 5, cy - 47 + bob);
-      ctx.lineTo(cx + 5, cy - 47 + bob);
-      ctx.lineTo(cx, cy - 36 + bob);
+      ctx.moveTo(cx - 4, cy - 47 + bob);
+      ctx.lineTo(cx + 4, cy - 47 + bob);
+      ctx.lineTo(cx, cy - 38 + bob);
       ctx.closePath();
       ctx.fill();
-      
-      // Red silk tie
-      ctx.fillStyle = '#dc2626';
-      ctx.fillRect(cx - 1.5, cy - 41 + bob, 3, 14);
+
+      // Cream polo collar flaps
+      ctx.fillStyle = '#eae5db'; // slightly darker cream for depth/collars
+      ctx.beginPath();
+      // Left collar flap
+      ctx.moveTo(cx - 5, cy - 47 + bob);
+      ctx.lineTo(cx - 1, cy - 41 + bob);
+      ctx.lineTo(cx - 1, cy - 47 + bob);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      // Right collar flap
+      ctx.moveTo(cx + 5, cy - 47 + bob);
+      ctx.lineTo(cx + 1, cy - 41 + bob);
+      ctx.lineTo(cx + 1, cy - 47 + bob);
+      ctx.closePath();
+      ctx.fill();
 
       // Gold chain necklace (Micah signature!)
       ctx.strokeStyle = '#eab308';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.arc(cx, cy - 47 + bob, 6, 0, Math.PI);
+      ctx.arc(cx, cy - 44 + bob, 4.5, 0, Math.PI);
       ctx.stroke();
     } else if (char.id === 'zlatan') {
       // Sweden yellow diagonal sash
@@ -911,22 +913,36 @@
 
     // 6. Hair & Facial Hair
     if (char.id === 'meeks') {
-      // Micah Richards neat fade
-      ctx.fillStyle = '#1a0800';
+      // Micah Richards curly afro textured hair
+      ctx.fillStyle = char.hair;
       ctx.beginPath();
       ctx.arc(hx, hy - 4, 14.5, Math.PI, 0);
       ctx.fill();
       ctx.fillRect(hx - 14, hy - 6, 28, 6);
+
+      // Curly texture bumps along the hair boundary
+      for (let angle = Math.PI; angle <= Math.PI * 2; angle += Math.PI / 6) {
+        const bx = hx + Math.cos(angle) * 14.5;
+        const by = hy - 4 + Math.sin(angle) * 14.5;
+        ctx.beginPath();
+        ctx.arc(bx, by, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Prominent black/dark-slate headband across the forehead
+      ctx.fillStyle = '#0f172a'; // Black/dark-slate
+      ctx.fillRect(hx - 14.5, hy - 8.5, 29, 3.5);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)'; // Subtle top highlight
+      ctx.fillRect(hx - 14.5, hy - 8.5, 29, 1);
+
+      // Thick neat black beard framing the jaw and cheeks
+      ctx.fillStyle = char.hair;
+      ctx.fillRect(hx - 14, hy - 2, 4, 12);  // Left sideburn/cheek
+      ctx.fillRect(hx + 10, hy - 2, 4, 12);  // Right sideburn/cheek
+      ctx.fillRect(hx - 13, hy + 7, 26, 7);   // Chin/jaw beard
       
-      // Side fade stubble
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-      ctx.fillRect(hx - 14, hy - 1, 2, 6);
-      ctx.fillRect(hx + 12, hy - 1, 2, 6);
-      
-      // Micah Beard
-      ctx.fillStyle = '#1a0800';
-      ctx.fillRect(hx - 11, hy + 7, 22, 5);
-      ctx.fillRect(hx - 7, hy + 11, 14, 3);
+      // Mustache connecting to the beard
+      ctx.fillRect(hx - 8, hy + 3, 16, 2.5);
     } else if (char.id === 'zlatan') {
       // Zlatan dark hair + ponytail man-bun (at the BACK of the head)
       ctx.fillStyle = '#2a1000';
@@ -1063,20 +1079,25 @@
       ctx.stroke();
     }
 
-    // 10. Mouths
     if (char.id === 'meeks') {
-      // Micah Richards wide laugh mouth cavity
-      ctx.fillStyle = '#4a0800'; // Dark red mouth interior
+      // Defined lips outline/shadow
+      ctx.fillStyle = '#3a1f10';
       ctx.beginPath();
-      ctx.arc(hx, hy + 5, 6, 0, Math.PI);
-      ctx.closePath();
+      ctx.ellipse(hx, hy + 6.5, 7.5, 4.5, 0, 0, Math.PI * 2);
       ctx.fill();
       
-      // Top teeth
+      // Inner mouth cavity
+      ctx.fillStyle = '#1e0502';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy + 6.5, 6.2, 3.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Top teeth (white bar)
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(hx - 5, hy + 4, 10, 2);
-      // Bottom teeth
-      ctx.fillRect(hx - 4, hy + 8, 8, 1);
+      ctx.fillRect(hx - 4.5, hy + 4.2, 9, 1.6);
+      
+      // Bottom teeth (white bar)
+      ctx.fillRect(hx - 3.5, hy + 7.2, 7, 1.2);
     } else if (char.id === 'alan') {
       // Alan deadpan straight mouth
       ctx.strokeStyle = '#111827';
@@ -1112,19 +1133,43 @@
 
     // 11. Big Meeks Glasses
     if (char.id === 'meeks') {
-      ctx.strokeStyle = '#1a1a1a';
+      // Thick round black frames (drawn as stroke)
+      ctx.strokeStyle = '#111827';
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(hx - 9, hy - 3, 6, 4);
-      ctx.strokeRect(hx + 3, hy - 3, 6, 4);
-      ctx.beginPath();
-      ctx.moveTo(hx - 3, hy - 1);
-      ctx.lineTo(hx + 3, hy - 1);
-      ctx.stroke();
       
-      // Light blue lens reflection
-      ctx.fillStyle = 'rgba(65, 248, 255, 0.4)';
-      ctx.fillRect(hx - 8, hy - 2, 4, 2);
-      ctx.fillRect(hx + 4, hy - 2, 4, 2);
+      // Left frame
+      ctx.beginPath();
+      ctx.arc(hx - 5.5, hy - 1, 4.2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Right frame
+      ctx.beginPath();
+      ctx.arc(hx + 5.5, hy - 1, 4.2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Transparent yellow/amber tint fill
+      ctx.fillStyle = 'rgba(234, 179, 8, 0.45)';
+      ctx.beginPath();
+      ctx.arc(hx - 5.5, hy - 1, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(hx + 5.5, hy - 1, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Connecting bridge
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(hx - 1.8, hy - 1);
+      ctx.lineTo(hx + 1.8, hy - 1);
+      ctx.stroke();
+
+      // Temple arms extending to the ears
+      ctx.beginPath();
+      ctx.moveTo(hx - 9.7, hy - 1);
+      ctx.lineTo(hx - 14, hy - 2);
+      ctx.moveTo(hx + 9.7, hy - 1);
+      ctx.lineTo(hx + 14, hy - 2);
+      ctx.stroke();
     }
 
     ctx.restore();
