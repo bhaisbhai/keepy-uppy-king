@@ -1,12 +1,15 @@
 (() => {
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
-  ctx.imageSmoothingEnabled = false;
 
   const W = 360;
   const H = 640;
-  canvas.width = W;
-  canvas.height = H;
+  
+  // Use a scale factor to lower the canvas resolution for that retro Street Fighter pixel density
+  const SCALE_FACTOR = 0.5; // 180x320 physical resolution
+  canvas.width = W * SCALE_FACTOR;
+  canvas.height = H * SCALE_FACTOR;
+  ctx.imageSmoothingEnabled = false;
 
   const GROUND_Y = 584;
   const PLAYER_Y = 563;
@@ -251,6 +254,11 @@
   function draw() {
     clicks = [];
     ctx.save();
+    
+    // Scale everything down to render at retro pixel resolution
+    ctx.scale(SCALE_FACTOR, SCALE_FACTOR);
+    ctx.imageSmoothingEnabled = false;
+    
     if (shake > 0.3) {
       ctx.translate(
         Math.round(Math.sin(shakePhase) * shake),
@@ -528,18 +536,46 @@
 
     // Left Leg (standing)
     ctx.fillRect(cx - 13, cy - 3 + bob, 6, 22);
+    ctx.strokeStyle = '#271008';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(cx - 13, cy - 3 + bob, 6, 22);
+    // Highlights on leg front (facing left)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.fillRect(cx - 13, cy - 3 + bob, 2, 22);
+
     ctx.fillStyle = '#111827'; // Boot
     ctx.fillRect(cx - 15, cy + 19 + bob, 9, 6);
+    ctx.strokeStyle = '#000000';
+    ctx.strokeRect(cx - 15, cy + 19 + bob, 9, 6);
+    ctx.fillStyle = '#ffffff'; // White sole
+    ctx.fillRect(cx - 15, cy + 24 + bob, 9, 1);
 
     // Right Leg (kicking/standing)
     ctx.fillStyle = char.skin;
     ctx.fillRect(cx + 7, cy - 3 + bob - ly, 6 + lx, 22 - lh);
+    ctx.strokeStyle = '#271008';
+    ctx.strokeRect(cx + 7, cy - 3 + bob - ly, 6 + lx, 22 - lh);
+
     ctx.fillStyle = '#111827'; // Boot
     ctx.fillRect(cx + 9 + lx, cy + 19 + bob - ly, 9, 6);
+    ctx.strokeStyle = '#000000';
+    ctx.strokeRect(cx + 9 + lx, cy + 19 + bob - ly, 9, 6);
+    ctx.fillStyle = '#ffffff'; // White sole
+    ctx.fillRect(cx + 9 + lx, cy + 24 + bob - ly, 9, 1);
 
     // 2. Shorts / Trousers
     ctx.fillStyle = char.shorts;
     ctx.fillRect(cx - 15, cy - 13 + bob, 31, 13);
+    ctx.strokeStyle = '#090a14';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(cx - 15, cy - 13 + bob, 31, 13);
+    
+    // Shorts highlights & shadows
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.fillRect(cx - 15, cy - 13 + bob, 3, 13); // Left edge highlight
+    ctx.fillRect(cx - 15, cy - 13 + bob, 31, 3);  // Top edge highlight
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    ctx.fillRect(cx + 12, cy - 13 + bob, 3, 13);  // Right edge shadow
     
     // Shorts hem highlight
     ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
@@ -554,15 +590,38 @@
       ctx.rect(cx - 19, cy - 47 + bob, 38, 35);
     }
     ctx.fill();
+    ctx.strokeStyle = '#090a14';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 16-bit Torso Shading (highlights and muscle crease)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.fillRect(cx - 19, cy - 47 + bob, 4, 35); // Left highlight
+    ctx.fillRect(cx - 19, cy - 47 + bob, 38, 4);  // Top highlight
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    ctx.fillRect(cx + 15, cy - 47 + bob, 4, 35); // Right shadow
+    ctx.fillRect(cx - 19, cy - 16 + bob, 38, 4);  // Bottom shadow
+    ctx.fillRect(cx - 1, cy - 43 + bob, 2, 28);   // Chest line division
 
     // Sleeves / Arms
     ctx.fillStyle = char.shirt;
     ctx.fillRect(cx - 27, cy - 41 + bob, 9, 14); // Left sleeve
+    ctx.strokeStyle = '#090a14';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(cx - 27, cy - 41 + bob, 9, 14);
+
+    ctx.fillStyle = char.shirt;
     ctx.fillRect(cx + 18, cy - 41 + bob, 9, 14); // Right sleeve
+    ctx.strokeRect(cx + 18, cy - 41 + bob, 9, 14);
     
     ctx.fillStyle = char.skin;
     ctx.fillRect(cx - 26, cy - 27 + bob, 7, 10); // Left hand
+    ctx.strokeStyle = '#271008';
+    ctx.strokeRect(cx - 26, cy - 27 + bob, 7, 10);
+
+    ctx.fillStyle = char.skin;
     ctx.fillRect(cx + 19, cy - 27 + bob, 7, 10); // Right hand
+    ctx.strokeRect(cx + 19, cy - 27 + bob, 7, 10);
 
     // Character Tattoos (Zlatan only)
     if (char.id === 'zlatan') {
@@ -590,7 +649,11 @@
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(cx - 27, cy - 41 + bob, 9, 14);
       ctx.fillRect(cx + 18, cy - 41 + bob, 9, 14);
+      ctx.strokeStyle = '#090a14';
+      ctx.strokeRect(cx - 27, cy - 41 + bob, 9, 14);
+      ctx.strokeRect(cx + 18, cy - 41 + bob, 9, 14);
       // White collar trim
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(cx - 7, cy - 47 + bob, 14, 3);
     } else if (char.id === 'meeks') {
       // Micah Richards Pundit Suit (3-piece grey suit with V-cut lapels)
@@ -663,14 +726,37 @@
     ctx.beginPath();
     ctx.arc(hx, hy, 14, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = '#271008';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
-    // Sculpt jawlines
+    // 16-bit Head Shading (Clipped spherical lighting)
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(hx, hy, 14, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.18)'; // top-left highlights
+    ctx.beginPath();
+    ctx.arc(hx - 5, hy - 5, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.14)'; // bottom-right shadow
+    ctx.beginPath();
+    ctx.arc(hx + 5, hy + 5, 11, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Sculpt jawlines with outlines
+    ctx.fillStyle = char.skin;
+    ctx.strokeStyle = '#271008';
+    ctx.lineWidth = 1.5;
     if (char.id === 'meeks') {
       // Micah strong square jaw
       ctx.fillRect(hx - 11, hy + 4, 22, 9);
+      ctx.strokeRect(hx - 11, hy + 4, 22, 9);
     } else if (char.id === 'alan') {
       // Shearer square jaw
       ctx.fillRect(hx - 12, hy + 3, 24, 10);
+      ctx.strokeRect(hx - 12, hy + 3, 24, 10);
     } else if (char.id === 'thierry') {
       // Thierry sleek tapered chin
       ctx.beginPath();
@@ -680,6 +766,7 @@
       ctx.lineTo(hx + 13, hy - 2);
       ctx.closePath();
       ctx.fill();
+      ctx.stroke();
     }
 
     // Gary Lineker big ears with inner folds and shading
@@ -1065,15 +1152,7 @@
       if (sel) { ctx.strokeStyle='#ffd43b'; ctx.lineWidth=1; ctx.strokeRect(cx+4,cy+4,cardW-8,cardH-8); }
       drawCharPortrait(cx + Math.round(cardW/2), cy+77, char);
       const lx = cx + Math.round(cardW/2) - Math.round(textWidth(char.name,9)/2);
-      pixelText(char.name, lx, cy+cardH-22, 9, '#ffffff');
-      
-      // Draw Pundit Traits
-      let trait = 'STANDARD BALANCE';
-      let traitColor = '#94a3b8';
-      if (char.id === 'thierry') { trait = 'PRO (+CTRL +SPEED)'; traitColor = '#65ff7a'; }
-      else if (char.id === 'meeks') { trait = 'CHAOS (+WILD KICKS)'; traitColor = '#ff6b6b'; }
-      const tx = cx + Math.round(cardW/2) - Math.round(textWidth(trait, 7)/2);
-      pixelText(trait, tx, cy+cardH-10, 7, traitColor);
+      pixelText(char.name, lx, cy+cardH-10, 9, '#ffffff');
 
       addClickZone(cx,cy,cardW,cardH, () => { selectedChar = char; });
     });
