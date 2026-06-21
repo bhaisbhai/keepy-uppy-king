@@ -537,7 +537,7 @@
     ctx.fillStyle = '#111827'; // Boot
     ctx.fillRect(cx + 9 + lx, cy + 19 + bob - ly, 9, 6);
 
-    // 2. Shorts
+    // 2. Shorts / Trousers
     ctx.fillStyle = char.shorts;
     ctx.fillRect(cx - 15, cy - 13 + bob, 31, 13);
     
@@ -545,7 +545,7 @@
     ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
     ctx.fillRect(cx - 15, cy - 3 + bob, 31, 3);
 
-    // 3. Torso (Shirt)
+    // 3. Torso (Shirt / Suit)
     ctx.fillStyle = char.shirt;
     ctx.beginPath();
     if (ctx.roundRect) {
@@ -556,6 +556,7 @@
     ctx.fill();
 
     // Sleeves / Arms
+    ctx.fillStyle = char.shirt;
     ctx.fillRect(cx - 27, cy - 41 + bob, 9, 14); // Left sleeve
     ctx.fillRect(cx + 18, cy - 41 + bob, 9, 14); // Right sleeve
     
@@ -563,15 +564,27 @@
     ctx.fillRect(cx - 26, cy - 27 + bob, 7, 10); // Left hand
     ctx.fillRect(cx + 19, cy - 27 + bob, 7, 10); // Right hand
 
+    // Character Tattoos (Zlatan only)
+    if (char.id === 'zlatan') {
+      ctx.fillStyle = '#2d3748'; // Dark ink
+      // Left arm ink details
+      ctx.fillRect(cx - 25, cy - 25 + bob, 4, 3);
+      ctx.fillRect(cx - 24, cy - 20 + bob, 3, 3);
+      // Right arm ink details
+      ctx.fillRect(cx + 20, cy - 26 + bob, 4, 3);
+      ctx.fillRect(cx + 19, cy - 21 + bob, 3, 4);
+    }
+
     // Shirt detailing (stripes/collars/suits)
     if (char.id === 'alan') {
-      // Newcastle stripes
+      // Newcastle black-and-white stripes
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(cx - 11, cy - 47 + bob, 5, 35);
-      ctx.fillRect(cx + 6, cy - 47 + bob, 5, 35);
+      ctx.fillRect(cx - 14, cy - 47 + bob, 5, 35);
+      ctx.fillRect(cx - 3, cy - 47 + bob, 6, 35);
+      ctx.fillRect(cx + 9, cy - 47 + bob, 5, 35);
       // Gold crest/star on Newcastle shirt
       ctx.fillStyle = '#ffd43b';
-      ctx.fillRect(cx + 6 * face, cy - 39 + bob, 3, 3);
+      ctx.fillRect(cx + 7 * face, cy - 39 + bob, 3, 3);
     } else if (char.id === 'thierry') {
       // Arsenal white sleeves
       ctx.fillStyle = '#ffffff';
@@ -580,45 +593,68 @@
       // White collar trim
       ctx.fillRect(cx - 7, cy - 47 + bob, 14, 3);
     } else if (char.id === 'meeks') {
-      // Pundit suit (Micah Richards)
-      ctx.fillStyle = '#ffffff'; // White shirt V-collar
+      // Micah Richards Pundit Suit (3-piece grey suit with V-cut lapels)
+      ctx.fillStyle = '#374151'; // Darker grey suit lapels
       ctx.beginPath();
-      ctx.moveTo(cx - 4, cy - 47 + bob);
-      ctx.lineTo(cx + 4, cy - 47 + bob);
-      ctx.lineTo(cx, cy - 35 + bob);
-      ctx.closePath();
+      ctx.moveTo(cx - 15, cy - 47 + bob);
+      ctx.lineTo(cx - 4, cy - 29 + bob);
+      ctx.lineTo(cx - 19, cy - 29 + bob);
       ctx.fill();
-      
-      ctx.fillStyle = '#dc2626'; // Red tie
-      ctx.fillRect(cx - 1, cy - 42 + bob, 2, 12);
-      
-      ctx.fillStyle = char.accent; // Gold button highlights
-      ctx.fillRect(cx - 3, cy - 29 + bob, 2, 2);
-      ctx.fillRect(cx - 3, cy - 23 + bob, 2, 2);
-    } else if (char.id === 'zlatan') {
-      // Sweden yellow shirt accent line
-      ctx.fillStyle = char.accent;
-      ctx.fillRect(cx - 19, cy - 47 + bob, 38, 3);
-      ctx.fillRect(cx - 19, cy - 30 + bob, 38, 2);
-    } else if (char.id === 'lineker') {
-      // England white V-neck collar
+      ctx.beginPath();
+      ctx.moveTo(cx + 15, cy - 47 + bob);
+      ctx.lineTo(cx + 4, cy - 29 + bob);
+      ctx.lineTo(cx + 19, cy - 29 + bob);
+      ctx.fill();
+
+      // White inner collared shirt
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.moveTo(cx - 5, cy - 47 + bob);
       ctx.lineTo(cx + 5, cy - 47 + bob);
-      ctx.lineTo(cx, cy - 41 + bob);
+      ctx.lineTo(cx, cy - 36 + bob);
       ctx.closePath();
       ctx.fill();
-      // England blue crest on chest
-      ctx.fillStyle = '#0033cc';
-      ctx.fillRect(cx + 6 * face, cy - 39 + bob, 3, 4);
+      
+      // Red silk tie
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(cx - 1.5, cy - 41 + bob, 3, 14);
+
+      // Gold chain necklace (Micah signature!)
+      ctx.strokeStyle = '#eab308';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy - 47 + bob, 6, 0, Math.PI);
+      ctx.stroke();
+    } else if (char.id === 'zlatan') {
+      // Sweden yellow diagonal sash
+      ctx.fillStyle = char.accent;
+      ctx.beginPath();
+      ctx.moveTo(cx - 19, cy - 42 + bob);
+      ctx.lineTo(cx - 14, cy - 47 + bob);
+      ctx.lineTo(cx + 19, cy - 25 + bob);
+      ctx.lineTo(cx + 19, cy - 30 + bob);
+      ctx.closePath();
+      ctx.fill();
+    } else if (char.id === 'lineker') {
+      // Gary Lineker smart MOTD open-collar shirt
+      ctx.fillStyle = char.skin; // chest skin reveal
+      ctx.beginPath();
+      ctx.moveTo(cx - 4, cy - 47 + bob);
+      ctx.lineTo(cx + 4, cy - 47 + bob);
+      ctx.lineTo(cx, cy - 38 + bob);
+      ctx.closePath();
+      ctx.fill();
+      // Collar flaps
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(cx - 6, cy - 47 + bob, 3, 5);
+      ctx.fillRect(cx + 3, cy - 47 + bob, 3, 5);
     }
 
     // 4. Neck
     ctx.fillStyle = char.skin;
     ctx.fillRect(cx - 5, cy - 54 + bob, 10, 8);
 
-    // 5. Head
+    // 5. Head & Custom Jawlines
     const hx = cx;
     const headNod = leg < 0 ? -leg * 1.5 : 0;
     const hy = cy - 69 + bob + headNod;
@@ -628,19 +664,39 @@
     ctx.arc(hx, hy, 14, 0, Math.PI * 2);
     ctx.fill();
 
-    // Gary Lineker big ears
+    // Sculpt jawlines
+    if (char.id === 'meeks') {
+      // Micah strong square jaw
+      ctx.fillRect(hx - 11, hy + 4, 22, 9);
+    } else if (char.id === 'alan') {
+      // Shearer square jaw
+      ctx.fillRect(hx - 12, hy + 3, 24, 10);
+    } else if (char.id === 'thierry') {
+      // Thierry sleek tapered chin
+      ctx.beginPath();
+      ctx.moveTo(hx - 13, hy - 2);
+      ctx.lineTo(hx - 9, hy + 12);
+      ctx.lineTo(hx + 9, hy + 12);
+      ctx.lineTo(hx + 13, hy - 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Gary Lineker big ears with inner folds and shading
     if (char.id === 'lineker') {
       ctx.fillStyle = char.skin;
       ctx.beginPath();
-      ctx.arc(hx - 15, hy, 4.5, 0, Math.PI * 2);
-      ctx.arc(hx + 15, hy, 4.5, 0, Math.PI * 2);
+      ctx.ellipse(hx - 15, hy, 5.5, 6, Math.PI / 12, 0, Math.PI * 2);
+      ctx.ellipse(hx + 15, hy, 5.5, 6, -Math.PI / 12, 0, Math.PI * 2);
       ctx.fill();
-      // Inner ear fold shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      
+      // Inner fold shadow
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(hx - 15, hy, 2, 0, Math.PI * 2);
-      ctx.arc(hx + 15, hy, 2, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.arc(hx - 15, hy, 2.5, Math.PI, 0);
+      ctx.arc(hx + 15, hy, 2.5, 0, Math.PI);
+      ctx.stroke();
     } else {
       ctx.fillStyle = char.skin;
       ctx.beginPath();
@@ -649,12 +705,12 @@
       ctx.fill();
     }
 
-    // Zlatan's prominent pointed nose or general nose shape for others
+    // Zlatan's prominent pointed nose or general nose shadow for others
     if (char.id === 'zlatan') {
       ctx.fillStyle = char.skin;
       ctx.beginPath();
-      ctx.moveTo(hx + 11 * face, hy - 3);
-      ctx.lineTo(hx + 16 * face, hy + 1);
+      ctx.moveTo(hx + 11 * face, hy - 4);
+      ctx.lineTo(hx + 18 * face, hy + 1); // Pointy tip
       ctx.lineTo(hx + 11 * face, hy + 4);
       ctx.closePath();
       ctx.fill();
@@ -701,13 +757,13 @@
       ctx.fill();
       
       // Hair tie (red)
-      ctx.fillStyle = '#dc2626';
-      ctx.fillRect(hx - 12 * face - 1, hy - 7, 3, 5);
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(hx - 13 * face, hy - 7, 3, 4);
       
       // Ponytail bun
-      ctx.fillStyle = '#2a1000';
+      ctx.fillStyle = '#1e0f06'; // Dark brown
       ctx.beginPath();
-      ctx.arc(hx - 14 * face, hy - 5, 4.5, 0, Math.PI * 2);
+      ctx.arc(hx - 15 * face, hy - 5, 5, 0, Math.PI * 2);
       ctx.fill();
       
       // Zlatan Goatee/Mustache with curled tips
@@ -737,12 +793,12 @@
       ctx.fillStyle = '#808080';
       ctx.fillRect(hx - 5, hy + 11, 10, 2);
     } else if (char.id === 'thierry') {
-      // Thierry detailed thin goatee and mustache
-      ctx.fillStyle = '#110906';
-      ctx.fillRect(hx - 8, hy + 5, 16, 1.5); // Mustache
-      ctx.fillRect(hx - 2, hy + 7, 4, 7);   // Chin strip
-      ctx.fillRect(hx - 7, hy + 6, 1.5, 4);  // Left connector
-      ctx.fillRect(hx + 5.5, hy + 6, 1.5, 4); // Right connector
+      // Thierry detailed thin goatee and mustache (seamless circle goatee)
+      ctx.strokeStyle = '#110906';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(hx, hy + 6, 4.5, 0, Math.PI * 2);
+      ctx.stroke();
     } else if (char.id === 'alan') {
       // Alan Shearer side stubble shadow
       ctx.fillStyle = '#c5a382';
@@ -750,40 +806,72 @@
       ctx.fillRect(hx + 12, hy - 2, 2, 6);
     }
 
-    // 7. Cartoon Eyes (Whites)
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-    ctx.lineWidth = 1;
-    
-    ctx.beginPath();
-    ctx.arc(hx - 5, hy - 1, 3.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+    // 7. Cartoon Eyes (Whites & Expressive shapes)
+    if (char.id === 'meeks') {
+      // Micah has laughing squinted eyes (closed)
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(hx - 9, hy - 2); ctx.lineTo(hx - 2, hy - 1);
+      ctx.moveTo(hx - 9, hy);     ctx.lineTo(hx - 2, hy - 1);
+      ctx.moveTo(hx + 2, hy - 1); ctx.lineTo(hx + 9, hy - 2);
+      ctx.moveTo(hx + 2, hy - 1); ctx.lineTo(hx + 9, hy);
+      ctx.stroke();
+    } else if (char.id === 'thierry') {
+      // Thierry quizzical eye shapes (left round/high, right squint/lower)
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.lineWidth = 1;
+      
+      // Left eye white (round & high)
+      ctx.beginPath();
+      ctx.arc(hx - 5, hy - 2, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(hx + 5, hy - 1, 3.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // 8. Pupil Eye-Tracking
-    let peX = 0, peY = 0;
-    if (ballX !== null && ballY !== null) {
-      const dx = ballX - hx;
-      const dy = ballY - hy;
-      const dist = Math.hypot(dx, dy);
-      if (dist > 0) {
-        peX = (dx / dist) * 1.5;
-        peY = (dy / dist) * 1.5;
-      }
+      // Right eye white (ellipse & lower)
+      ctx.beginPath();
+      ctx.ellipse(hx + 5, hy - 1, 3.5, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
     } else {
-      peX = 1 * face;
+      // Standard circular eyes
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.lineWidth = 1;
+      
+      ctx.beginPath();
+      ctx.arc(hx - 5, hy - 1, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(hx + 5, hy - 1, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
     }
 
-    ctx.fillStyle = '#111827';
-    ctx.beginPath();
-    ctx.arc(hx - 5 + peX, hy - 1 + peY, 1.5, 0, Math.PI * 2);
-    ctx.arc(hx + 5 + peX, hy - 1 + peY, 1.5, 0, Math.PI * 2);
-    ctx.fill();
+    // 8. Pupil Eye-Tracking (Only if not closed/squinted)
+    if (char.id !== 'meeks') {
+      let peX = 0, peY = 0;
+      if (ballX !== null && ballY !== null) {
+        const dx = ballX - hx;
+        const dy = ballY - hy;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 0) {
+          peX = (dx / dist) * 1.5;
+          peY = (dy / dist) * 1.5;
+        }
+      } else {
+        peX = 1 * face;
+      }
+
+      ctx.fillStyle = '#111827';
+      ctx.beginPath();
+      ctx.arc(hx - 5 + peX, hy - 1 + peY, 1.5, 0, Math.PI * 2);
+      ctx.arc(hx + 5 + peX, hy - 1 + peY, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     // 9. Eyebrows
     ctx.strokeStyle = '#111827';
@@ -797,17 +885,17 @@
     } else if (char.id === 'thierry') {
       ctx.beginPath();
       // Quizzical left eyebrow (arched and high)
-      ctx.moveTo(hx - 8, hy - 7);
-      ctx.quadraticCurveTo(hx - 5, hy - 9, hx - 2, hy - 6);
+      ctx.moveTo(hx - 9, hy - 8);
+      ctx.quadraticCurveTo(hx - 5, hy - 10, hx - 1, hy - 6);
       // Normal right eyebrow (low and flat)
       ctx.moveTo(hx + 2, hy - 5);
-      ctx.lineTo(hx + 7, hy - 5);
+      ctx.lineTo(hx + 8, hy - 5);
       ctx.stroke();
     } else if (char.id === 'alan') {
       // Serious, furrowed eyebrows slanting down in the middle
       ctx.beginPath();
-      ctx.moveTo(hx - 8, hy - 4); ctx.lineTo(hx - 3, hy - 6);
-      ctx.moveTo(hx + 3, hy - 6); ctx.lineTo(hx + 8, hy - 4);
+      ctx.moveTo(hx - 8, hy - 4); ctx.lineTo(hx - 2, hy - 6);
+      ctx.moveTo(hx + 2, hy - 6); ctx.lineTo(hx + 8, hy - 4);
       ctx.stroke();
     } else {
       ctx.beginPath();
@@ -818,16 +906,18 @@
 
     // 10. Mouths
     if (char.id === 'meeks') {
-      // Micah Richards legendary wide laugh (dark red mouth cavity with white teeth bevel)
+      // Micah Richards wide laugh mouth cavity
       ctx.fillStyle = '#4a0800'; // Dark red mouth interior
       ctx.beginPath();
-      ctx.arc(hx, hy + 5, 5.5, 0, Math.PI);
+      ctx.arc(hx, hy + 5, 6, 0, Math.PI);
       ctx.closePath();
       ctx.fill();
       
-      // White teeth
+      // Top teeth
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(hx - 4, hy + 4, 8, 2);
+      ctx.fillRect(hx - 5, hy + 4, 10, 2);
+      // Bottom teeth
+      ctx.fillRect(hx - 4, hy + 8, 8, 1);
     } else if (char.id === 'alan') {
       // Alan deadpan straight mouth
       ctx.strokeStyle = '#111827';
