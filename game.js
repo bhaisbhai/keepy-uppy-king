@@ -33,6 +33,8 @@
   let unlockedMessage = '';
   let unlockedTimer = 0;
   let player, ball, score, streak, bestRunCombo, perfects, level, earnedCoins;
+  let daylightProgress = 0;
+  let cloudTimer = 0;
 
   function loadData() {
     const base = { best: 0, coins: 0 };
@@ -173,6 +175,12 @@
   function update(dt) {
     if (unlockedTimer > 0) unlockedTimer -= dt;
     updateEffects(dt);
+    
+    // Daylight transition progress
+    const targetDaylight = (state === 'playing' || state === 'gameover') && score >= 150 ? 1 : 0;
+    daylightProgress += (targetDaylight - daylightProgress) * Math.min(1, dt * 2.0);
+    cloudTimer += dt;
+
     if (state !== 'playing') return;
     if (shake > 0) { shake -= dt * 25; shakePhase += dt * 35; }
     if (player.leg > 0) player.leg = Math.max(0, player.leg - dt * 16);
@@ -267,91 +275,200 @@
   }
 
   function drawBackground() {
-    // Sky gradient (Deep night blue to purple)
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
-    skyGrad.addColorStop(0, '#030512');
-    skyGrad.addColorStop(0.3, '#090d2e');
-    skyGrad.addColorStop(0.6, '#131842');
-    ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, W, H);
+    // --- 1. NIGHT BACKGROUND ---
+    if (daylightProgress < 0.99) {
+      ctx.save();
+      // Sky gradient (Deep night blue to purple)
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+      skyGrad.addColorStop(0, '#030512');
+      skyGrad.addColorStop(0.3, '#090d2e');
+      skyGrad.addColorStop(0.6, '#131842');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, W, H);
 
-    // Glowing stars
-    for (let i = 0; i < 35; i++) {
-      ctx.fillStyle = ['rgba(255, 212, 59, 0.45)', 'rgba(65, 248, 255, 0.45)', 'rgba(255, 255, 255, 0.6)'][i % 3];
-      const sx = (i * 79 + 17) % W;
-      const sy = (i * 37 + 11) % 150;
-      ctx.fillRect(sx, sy, i % 2 === 0 ? 2 : 1, i % 2 === 0 ? 2 : 1);
-    }
-
-    // Floodlight glow cones
-    drawFloodlight(73, 93); 
-    drawFloodlight(287, 91);
-
-    // Stadium seating stand silhouette
-    ctx.fillStyle = '#0a0d2a';
-    ctx.beginPath();
-    ctx.moveTo(0, 200);
-    ctx.bezierCurveTo(W * 0.25, 175, W * 0.75, 175, W, 200);
-    ctx.lineTo(W, 311);
-    ctx.lineTo(0, 311);
-    ctx.closePath();
-    ctx.fill();
-
-    // Dark stadium seating structure
-    ctx.fillStyle = '#0b0f34';
-    ctx.fillRect(0, 230, W, 81);
-    
-    // Colorful crowd spectators matrix
-    for (let cy = 236; cy < 305; cy += 6) {
-      for (let cx = 4; cx < W; cx += 8) {
-        ctx.fillStyle = ['#1e293b', '#3b82f6', '#ef4444', '#eab308', '#22c55e', '#ec4899', '#ffffff', '#06b6d4'][(cx * 17 + cy * 11) % 8];
-        ctx.fillRect(cx + (cy % 4), cy, 3, 3);
+      // Glowing stars
+      for (let i = 0; i < 35; i++) {
+        ctx.fillStyle = ['rgba(255, 212, 59, 0.45)', 'rgba(65, 248, 255, 0.45)', 'rgba(255, 255, 255, 0.6)'][i % 3];
+        const sx = (i * 79 + 17) % W;
+        const sy = (i * 37 + 11) % 150;
+        ctx.fillRect(sx, sy, i % 2 === 0 ? 2 : 1, i % 2 === 0 ? 2 : 1);
       }
-    }
 
-    // Billboard ads at front of stands
-    const ads = [['PLAY EVERY DAY!', '#1e3a8a', 130], ['KEEPY KING!', '#991b1b', 100], ['GOAL!', '#065f46', 130]];
-    ads.reduce((bx, [t, c, w]) => {
-      ctx.fillStyle = c;
-      ctx.fillRect(bx, 297, w, 14);
-      ctx.fillStyle = '#ffffff';
-      pixelText(t, bx + 8, 307, 6);
-      return bx + w;
-    }, 0);
+      // Floodlight glow cones
+      drawFloodlight(73, 93); 
+      drawFloodlight(287, 91);
 
-    // Grass pitch gradient
-    const pitchGrad = ctx.createLinearGradient(0, 311, 0, H);
-    pitchGrad.addColorStop(0, '#135c24');
-    pitchGrad.addColorStop(1, '#093a15');
-    ctx.fillStyle = pitchGrad;
-    ctx.fillRect(0, 311, W, H - 311);
-
-    // Diagonal grass cut stripes
-    for (let px = -60; px < W; px += 64) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+      // Stadium seating stand silhouette
+      ctx.fillStyle = '#0a0d2a';
       ctx.beginPath();
-      ctx.moveTo(px, 311);
-      ctx.lineTo(px + 40, 311);
-      ctx.lineTo(px + 90, H);
-      ctx.lineTo(px + 40, H);
+      ctx.moveTo(0, 200);
+      ctx.bezierCurveTo(W * 0.25, 175, W * 0.75, 175, W, 200);
+      ctx.lineTo(W, 311);
+      ctx.lineTo(0, 311);
       ctx.closePath();
       ctx.fill();
+
+      // Dark stadium seating structure
+      ctx.fillStyle = '#0b0f34';
+      ctx.fillRect(0, 230, W, 81);
+      
+      // Colorful crowd spectators matrix
+      for (let cy = 236; cy < 305; cy += 6) {
+        for (let cx = 4; cx < W; cx += 8) {
+          ctx.fillStyle = ['#1e293b', '#3b82f6', '#ef4444', '#eab308', '#22c55e', '#ec4899', '#ffffff', '#06b6d4'][(cx * 17 + cy * 11) % 8];
+          ctx.fillRect(cx + (cy % 4), cy, 3, 3);
+        }
+      }
+
+      // Billboard ads at front of stands
+      const ads = [['PLAY EVERY DAY!', '#1e3a8a', 130], ['KEEPY KING!', '#991b1b', 100], ['GOAL!', '#065f46', 130]];
+      ads.reduce((bx, [t, c, w]) => {
+        ctx.fillStyle = c;
+        ctx.fillRect(bx, 297, w, 14);
+        ctx.fillStyle = '#ffffff';
+        pixelText(t, bx + 8, 307, 6);
+        return bx + w;
+      }, 0);
+
+      // Grass pitch gradient
+      const pitchGrad = ctx.createLinearGradient(0, 311, 0, H);
+      pitchGrad.addColorStop(0, '#135c24');
+      pitchGrad.addColorStop(1, '#093a15');
+      ctx.fillStyle = pitchGrad;
+      ctx.fillRect(0, 311, W, H - 311);
+
+      // Diagonal grass cut stripes
+      for (let px = -60; px < W; px += 64) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+        ctx.beginPath();
+        ctx.moveTo(px, 311);
+        ctx.lineTo(px + 40, 311);
+        ctx.lineTo(px + 90, H);
+        ctx.lineTo(px + 40, H);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // White pitch markings
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+      ctx.lineWidth = 1.5;
+      
+      // Halfway line
+      ctx.beginPath();
+      ctx.moveTo(W / 2, 311);
+      ctx.lineTo(W / 2, H);
+      ctx.stroke();
+
+      // Center circle
+      ctx.beginPath();
+      ctx.arc(W / 2, GROUND_Y, 77, Math.PI, 0);
+      ctx.stroke();
+      ctx.restore();
     }
 
-    // White pitch markings
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-    ctx.lineWidth = 1.5;
-    
-    // Halfway line
-    ctx.beginPath();
-    ctx.moveTo(W / 2, 311);
-    ctx.lineTo(W / 2, H);
-    ctx.stroke();
+    // --- 2. DAYLIGHT BACKGROUND ---
+    if (daylightProgress > 0) {
+      ctx.save();
+      ctx.globalAlpha = daylightProgress;
+      
+      // Day Sky gradient
+      const daySkyGrad = ctx.createLinearGradient(0, 0, 0, H);
+      daySkyGrad.addColorStop(0, '#7dd3fc');
+      daySkyGrad.addColorStop(0.5, '#bae6fd');
+      daySkyGrad.addColorStop(1, '#e0f2fe');
+      ctx.fillStyle = daySkyGrad;
+      ctx.fillRect(0, 0, W, H);
 
-    // Center circle
-    ctx.beginPath();
-    ctx.arc(W / 2, GROUND_Y, 77, Math.PI, 0);
-    ctx.stroke();
+      // Golden Sun
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(W - 60, 50, 20, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.22)';
+      ctx.beginPath();
+      ctx.arc(W - 60, 50, 32, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Drifting clouds
+      drawPixelCloud(Math.round((cloudTimer * 4) % (W + 120) - 60), 30, 0.8);
+      drawPixelCloud(Math.round((cloudTimer * 6 + 160) % (W + 160) - 80), 55, 1.2);
+      drawPixelCloud(Math.round((cloudTimer * 3 + 80) % (W + 140) - 70), 85, 0.6);
+
+      // Stadium seating stand silhouette
+      ctx.fillStyle = '#475569';
+      ctx.beginPath();
+      ctx.moveTo(0, 200);
+      ctx.bezierCurveTo(W * 0.25, 175, W * 0.75, 175, W, 200);
+      ctx.lineTo(W, 311);
+      ctx.lineTo(0, 311);
+      ctx.closePath();
+      ctx.fill();
+
+      // Day stadium seating structure
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(0, 230, W, 81);
+      
+      // Day crowd spectators matrix
+      for (let cy = 236; cy < 305; cy += 6) {
+        for (let cx = 4; cx < W; cx += 8) {
+          ctx.fillStyle = ['#475569', '#3b82f6', '#ef4444', '#eab308', '#22c55e', '#ec4899', '#ffffff', '#06b6d4'][(cx * 17 + cy * 11) % 8];
+          ctx.fillRect(cx + (cy % 4), cy, 3, 3);
+        }
+      }
+
+      // Billboard ads at front of stands
+      const ads = [['PLAY EVERY DAY!', '#2563eb', 130], ['KEEPY KING!', '#dc2626', 100], ['GOAL!', '#16a34a', 130]];
+      ads.reduce((bx, [t, c, w]) => {
+        ctx.fillStyle = c;
+        ctx.fillRect(bx, 297, w, 14);
+        ctx.fillStyle = '#ffffff';
+        pixelText(t, bx + 8, 307, 6);
+        return bx + w;
+      }, 0);
+
+      // Grass pitch gradient
+      const dayPitchGrad = ctx.createLinearGradient(0, 311, 0, H);
+      dayPitchGrad.addColorStop(0, '#15803d');
+      dayPitchGrad.addColorStop(1, '#166534');
+      ctx.fillStyle = dayPitchGrad;
+      ctx.fillRect(0, 311, W, H - 311);
+
+      // Day Diagonal grass stripes
+      for (let px = -60; px < W; px += 64) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.035)';
+        ctx.beginPath();
+        ctx.moveTo(px, 311);
+        ctx.lineTo(px + 40, 311);
+        ctx.lineTo(px + 90, H);
+        ctx.lineTo(px + 40, H);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Day White pitch markings
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.lineWidth = 1.5;
+      
+      // Halfway line
+      ctx.beginPath();
+      ctx.moveTo(W / 2, 311);
+      ctx.lineTo(W / 2, H);
+      ctx.stroke();
+
+      // Center circle
+      ctx.beginPath();
+      ctx.arc(W / 2, GROUND_Y, 77, Math.PI, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawPixelCloud(cx, cy, scale) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.fillRect(cx, cy, Math.round(32 * scale), Math.round(12 * scale));
+    ctx.fillRect(cx + Math.round(6 * scale), cy - Math.round(6 * scale), Math.round(20 * scale), Math.round(6 * scale));
+    ctx.fillRect(cx - Math.round(4 * scale), cy + Math.round(3 * scale), Math.round(8 * scale), Math.round(6 * scale));
+    ctx.fillRect(cx + Math.round(28 * scale), cy + Math.round(3 * scale), Math.round(8 * scale), Math.round(6 * scale));
   }
 
   function drawFloodlight(x, y) {
