@@ -47,7 +47,7 @@
     score = 0; streak = 0; bestRunCombo = 1; perfects = 0;
     level = 1; earnedCoins = 0; unlockedMessage = '';
     player = { x: W / 2, y: PLAYER_Y, leg: 0, face: 1, shuffle: 0,
-               wander: 0, wanderTarget: 0, wanderTimer: 0 };
+               wander: 0, wanderTarget: 0, wanderTimer: 0, kickCooldown: 0 };
     ball = { x: W / 2 + 2, y: 387, vx: 8, vy: 16, r: 11, spin: 0, canKick: true };
     particles = []; floatTexts = []; shake = 0; shakePhase = 0;
   }
@@ -64,7 +64,9 @@
 
   function tryKick() {
     if (state !== 'playing') return;
-    if (player.leg > 0) return; // Prevent kick attempts during active kick/whiff animation
+    if (player.kickCooldown > 0) return; // Prevent kick attempts during active 0.25s input cooldown
+    
+    player.kickCooldown = 0.25; // Apply a 0.25s input cooldown on every attempt
     
     const footY = PLAYER_Y - 24;
     const dy = Math.abs(ball.y - footY);
@@ -120,6 +122,7 @@
     if (state !== 'playing') return;
     if (shake > 0) { shake -= dt * 25; shakePhase += dt * 35; }
     if (player.leg > 0) player.leg -= dt * 16;
+    if (player.kickCooldown > 0) player.kickCooldown -= dt;
     // Unlock kick once ball has risen at least 100px above foot level
     if (!ball.canKick && ball.y < PLAYER_Y - 100) ball.canKick = true;
 
