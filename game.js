@@ -517,6 +517,47 @@
     ctx.setLineDash([]);
   }
 
+  function defineHeadPath(c, hx, hy, charId) {
+    c.beginPath();
+    if (charId === 'meeks') {
+      // Micah: wide, square, blocky head
+      if (c.roundRect) {
+        c.roundRect(hx - 14, hy - 13, 28, 27, [8, 8, 6, 6]);
+      } else {
+        c.rect(hx - 14, hy - 13, 28, 27);
+      }
+    } else if (charId === 'alan') {
+      // Shearer: inverted egg, wide jaw, bald dome
+      c.moveTo(hx, hy - 14);
+      c.bezierCurveTo(hx + 11, hy - 14, hx + 13, hy - 2, hx + 13, hy + 9);
+      c.bezierCurveTo(hx + 13, hy + 14, hx + 9, hy + 14, hx, hy + 14);
+      c.bezierCurveTo(hx - 9, hy + 14, hx - 13, hy + 14, hx - 13, hy + 9);
+      c.bezierCurveTo(hx - 13, hy - 2, hx - 11, hy - 14, hx, hy - 14);
+    } else if (charId === 'thierry') {
+      // Thierry: long, sleek, tapered chin, high forehead
+      c.moveTo(hx, hy - 16);
+      c.bezierCurveTo(hx + 12, hy - 16, hx + 12, hy - 4, hx + 8, hy + 8);
+      c.bezierCurveTo(hx + 7, hy + 13, hx + 5, hy + 13, hx, hy + 13);
+      c.bezierCurveTo(hx - 5, hy + 13, hx - 7, hy + 13, hx - 8, hy + 8);
+      c.bezierCurveTo(hx - 12, hy - 4, hx - 12, hy - 16, hx, hy - 16);
+    } else if (charId === 'lineker') {
+      // Lineker: diamond/heart-shaped face, wide cheekbones
+      c.moveTo(hx, hy - 14);
+      c.bezierCurveTo(hx + 14, hy - 14, hx + 14, hy - 2, hx + 10, hy + 8);
+      c.bezierCurveTo(hx + 8, hy + 12, hx + 5, hy + 12, hx, hy + 12);
+      c.bezierCurveTo(hx - 5, hy + 12, hx - 8, hy + 12, hx - 10, hy + 8);
+      c.bezierCurveTo(hx - 14, hy - 2, hx - 14, hy - 14, hx, hy - 14);
+    } else { // zlatan
+      // Zlatan: long, angular, tall rectangular face
+      c.moveTo(hx, hy - 15);
+      c.bezierCurveTo(hx + 11, hy - 15, hx + 11, hy - 4, hx + 11, hy + 8);
+      c.bezierCurveTo(hx + 11, hy + 13, hx + 6, hy + 14, hx, hy + 14);
+      c.bezierCurveTo(hx - 6, hy + 14, hx - 11, hy + 13, hx - 11, hy + 8);
+      c.bezierCurveTo(hx - 11, hy - 4, hx - 11, hy - 15, hx, hy - 15);
+    }
+    c.closePath();
+  }
+
   function drawPundit(cx, cy, char, bob, leg, face, ballX, ballY) {
     const realCx = cx;
     const realCy = cy;
@@ -757,23 +798,22 @@
     ctx.fillStyle = char.skin;
     ctx.fillRect(cx - 5, cy - 54 + bob, 10, 8);
 
-    // 5. Head & Custom Jawlines
+    // 5. Head & Custom Shapes (matching each player's likeness)
     const hx = cx;
     const headNod = leg < 0 ? -leg * 1.5 : 0;
     const hy = cy - 69 + bob + headNod;
     
+    // Draw the custom player-specific head shape
     ctx.fillStyle = char.skin;
-    ctx.beginPath();
-    ctx.arc(hx, hy, 14, 0, Math.PI * 2);
+    defineHeadPath(ctx, hx, hy, char.id);
     ctx.fill();
     ctx.strokeStyle = '#271008';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // 16-bit Head Shading (Clipped spherical lighting)
+    // 16-bit Head Shading (Clipped to the custom head shape)
     ctx.save();
-    ctx.beginPath();
-    ctx.arc(hx, hy, 14, 0, Math.PI * 2);
+    defineHeadPath(ctx, hx, hy, char.id);
     ctx.clip();
     ctx.fillStyle = 'rgba(255, 255, 255, 0.18)'; // top-left highlights
     ctx.beginPath();
@@ -784,30 +824,6 @@
     ctx.arc(hx + 5, hy + 5, 11, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
-
-    // Sculpt jawlines with outlines
-    ctx.fillStyle = char.skin;
-    ctx.strokeStyle = '#271008';
-    ctx.lineWidth = 1.5;
-    if (char.id === 'meeks') {
-      // Micah strong square jaw
-      ctx.fillRect(hx - 11, hy + 4, 22, 9);
-      ctx.strokeRect(hx - 11, hy + 4, 22, 9);
-    } else if (char.id === 'alan') {
-      // Shearer square jaw
-      ctx.fillRect(hx - 12, hy + 3, 24, 10);
-      ctx.strokeRect(hx - 12, hy + 3, 24, 10);
-    } else if (char.id === 'thierry') {
-      // Thierry sleek tapered chin
-      ctx.beginPath();
-      ctx.moveTo(hx - 13, hy - 2);
-      ctx.lineTo(hx - 9, hy + 12);
-      ctx.lineTo(hx + 9, hy + 12);
-      ctx.lineTo(hx + 13, hy - 2);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
 
     // Gary Lineker big ears with inner folds and shading
     if (char.id === 'lineker') {
