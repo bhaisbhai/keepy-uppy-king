@@ -1170,34 +1170,23 @@
   }
 
   function drawInstructions() {
-    panel(13, 51, W - 27, 510);
+    panel(20, 100, W - 40, 440);
     
-    pixelText('HOW TO PLAY', W/2 - textWidth('HOW TO PLAY', 18)/2, 95, 18, '#ffd43b');
+    pixelText('HOW TO PLAY', W/2 - textWidth('HOW TO PLAY', 20)/2, 160, 20, '#ffd43b');
     
-    const leftX = 27;
-    let y = 150;
+    pixelText('TAP OR SPACE TO KICK', W/2 - textWidth('TAP OR SPACE TO KICK', 12)/2, 220, 12, '#41f8ff');
     
-    pixelText('1. BASIC KICKING', leftX, y, 14, '#41f8ff');
-    y += 24;
-    pixelText('Tap screen or press SPACEBAR when the ball', leftX, y, 12, '#ffffff');
-    y += 18;
-    pixelText('is close to the player. Only 1 tap allowed', leftX, y, 12, '#ffffff');
-    y += 18;
-    pixelText('per bounce - keep it in the air!', leftX, y, 12, '#ffffff');
+    const listX = W/2 - 65;
+    let y = 280;
+    const size = 14;
+    const spacing = 28;
     
-    y += 45;
+    pixelText('HEAD:    1 PT',  listX, y, size, '#60a5fa'); y += spacing;
+    pixelText('KNEE:    2 PTS', listX, y, size, '#fb923c'); y += spacing;
+    pixelText('FOOT:    3 PTS', listX, y, size, '#ffd43b'); y += spacing;
+    pixelText('PERFECT: 5 PTS', listX, y, size, '#65ff7a');
     
-    pixelText('2. JUGGLING SCORING ZONES', leftX, y, 14, '#41f8ff');
-    y += 24;
-    pixelText('HEADER (High): Tap near head.   (+1 pt)', leftX, y, 12, '#60a5fa');
-    y += 18;
-    pixelText('KNEE-UP (Mid): Tap at knee level. (+2 pts)', leftX, y, 12, '#fb923c');
-    y += 18;
-    pixelText('VOLLEY (Low): Tap at foot level. (+3 pts)', leftX, y, 12, '#ffd43b');
-    y += 18;
-    pixelText('PERFECT VOLLEY: Last microsecond. (+5 pts)', leftX, y, 12, '#65ff7a');
-    
-    addButton('BACK', W/2 - 50, 480, 100, 40, () => { state = 'menu'; });
+    addButton('BACK', W/2 - 50, 470, 100, 40, () => { state = 'menu'; });
   }
 
   function drawCharSelect() {
