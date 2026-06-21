@@ -64,10 +64,16 @@
 
   function tryKick() {
     if (state !== 'playing') return;
+    if (player.leg > 0) return; // Prevent kick attempts during active kick/whiff animation
+    
     const footY = PLAYER_Y - 24;
     const dy = Math.abs(ball.y - footY);
     const dx = Math.abs(ball.x - player.x);
     if (dy >= 48 || dx >= 56 || ball.vy <= -133) {
+      // Trigger whiff animation and face the ball
+      const side = Math.sign(ball.x - player.x) || player.face;
+      player.leg = 8;
+      player.face = side;
       addFloatText(ball.y < footY ? 'TOO EARLY!' : 'REACH!', player.x, PLAYER_Y - 73, '#ff6b6b');
       return;
     }
