@@ -68,7 +68,6 @@
     const dx = Math.abs(ball.x - player.x);
     if (dy >= 48 || dx >= 56 || ball.vy <= -133) {
       addFloatText(ball.y < footY ? 'TOO EARLY!' : 'REACH!', player.x, PLAYER_Y - 73, '#ff6b6b');
-      shake = Math.max(shake, 2); shakePhase = 0;
       return;
     }
     const perfect = dy < 12 && dx < 27 && ball.vy > 0;
@@ -86,7 +85,7 @@
     ball.vx = clamp(ball.vx, -147 - level * 4, 147 + level * 4);
     ball.y = Math.min(ball.y, footY - 1);
     player.leg = 8; player.face = side;
-    shake = perfect ? 3 : 1.5; shakePhase = 0;
+    if (perfect) { shake = 1.5; shakePhase = 0; }
 
     if (perfect) {
       addFloatText(`PERFECT +${gained}`, ball.x, ball.y - 13, '#65ff7a');
