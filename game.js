@@ -333,7 +333,7 @@
       }
 
       // Billboard ads at front of stands
-      const ads = [['PLAY EVERY DAY!', '#1e3a8a', 130], ['KEEPY KING!', '#991b1b', 100], ['GOAL!', '#065f46', 130]];
+      const ads = [['GAME-BUDDY.CO.UK', '#1e3a8a', 130], ['KEEPY KING!', '#991b1b', 100], ['GAME-BUDDY.CO.UK', '#065f46', 130]];
       ads.reduce((bx, [t, c, w]) => {
         ctx.fillStyle = c;
         ctx.fillRect(bx, 297, w, 14);
@@ -429,7 +429,7 @@
       }
 
       // Billboard ads at front of stands
-      const ads = [['PLAY EVERY DAY!', '#2563eb', 130], ['KEEPY KING!', '#dc2626', 100], ['GOAL!', '#16a34a', 130]];
+      const ads = [['GAME-BUDDY.CO.UK', '#2563eb', 130], ['KEEPY KING!', '#dc2626', 100], ['GAME-BUDDY.CO.UK', '#16a34a', 130]];
       ads.reduce((bx, [t, c, w]) => {
         ctx.fillStyle = c;
         ctx.fillRect(bx, 297, w, 14);
