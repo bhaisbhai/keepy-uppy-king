@@ -46,7 +46,8 @@
     state = 'playing';
     score = 0; streak = 0; bestRunCombo = 1; perfects = 0;
     level = 1; earnedCoins = 0; unlockedMessage = '';
-    player = { x: W / 2, y: PLAYER_Y, leg: 0, face: 1, shuffle: 0 };
+    player = { x: W / 2, y: PLAYER_Y, leg: 0, face: 1, shuffle: 0,
+               wander: 0, wanderTarget: 0, wanderTimer: 0, kickCooldown: 0 };
     ball = { x: W / 2 + 2, y: 387, vx: 8, vy: 16, r: 11, spin: 0 };
     particles = []; floatTexts = []; shake = 0; shakePhase = 0;
   }
@@ -70,6 +71,8 @@
       addFloatText(ball.y < footY ? 'TOO EARLY!' : 'REACH!', player.x, PLAYER_Y - 73, '#ff6b6b');
       return;
     }
+    if (player.kickCooldown > 0) return;
+    player.kickCooldown = 0.38;
     const perfect = dy < 12 && dx < 27 && ball.vy > 0;
     const combo = getCombo();
     const gained = (perfect ? 3 : 1) * combo;
@@ -111,11 +114,20 @@
     if (state !== 'playing') return;
     if (shake > 0) { shake -= dt * 25; shakePhase += dt * 35; }
     if (player.leg > 0) player.leg -= dt * 16;
+    if (player.kickCooldown > 0) player.kickCooldown -= dt;
+
+    // Wander: smoothly drift toward a random offset, changing target every 0.5-1.3s
+    player.wanderTimer -= dt;
+    if (player.wanderTimer <= 0) {
+      player.wanderTarget = (Math.random() - 0.5) * 64;
+      player.wanderTimer = 0.5 + Math.random() * 0.8;
+    }
+    player.wander += (player.wanderTarget - player.wander) * Math.min(1, dt * 2.5);
 
     const manual = (keys.left ? -1 : 0) + (keys.right ? 1 : 0);
     player.x += manual * 173 * dt;
     const autoStep = Math.max(24, 120 - level * 7) * dt;
-    const dx = ball.x - player.x;
+    const dx = (ball.x + player.wander) - player.x;
     player.x += Math.sign(dx) * Math.min(Math.abs(dx), autoStep);
     player.x = clamp(player.x, 45, W - 45);
     player.shuffle += dt * 3.5;
