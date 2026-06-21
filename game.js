@@ -1221,11 +1221,28 @@
   }
 
   async function shareScore() {
-    const text = `I scored ${score} in Keepy-Uppy King! Can you beat me?`;
+    const gameUrl = 'https://bhaisbhai.github.io/keepy-uppy-king/';
+    const shareText = `I scored ${score} in Keepy-Uppy King! Can you beat me?`;
+    const fullText = `${shareText} Play here: ${gameUrl}`;
     try {
-      if (navigator.share) await navigator.share({ title:'Keepy-Uppy King', text });
-      else { await navigator.clipboard.writeText(text); unlockedMessage='SCORE COPIED!'; unlockedTimer=1.2; }
-    } catch(_) {}
+      if (navigator.share) {
+        await navigator.share({ 
+          title: 'Keepy-Uppy King', 
+          text: shareText, 
+          url: gameUrl 
+        });
+      } else {
+        await navigator.clipboard.writeText(fullText);
+        unlockedMessage = 'SCORE & LINK COPIED!';
+        unlockedTimer = 1.2;
+      }
+    } catch(_) {
+      try {
+        await navigator.clipboard.writeText(fullText);
+        unlockedMessage = 'SCORE & LINK COPIED!';
+        unlockedTimer = 1.2;
+      } catch(__) {}
+    }
   }
 
   function drawEffects() {
