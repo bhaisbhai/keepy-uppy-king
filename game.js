@@ -12,11 +12,11 @@
   const PLAYER_Y = 563;
 
   const CHARACTERS = [
-    { id: 'meeks',   name: 'BIG MEEKS', skin: '#5c3a1e', hair: '#1a0800', shirt: '#cc2200', accent: '#ffd43b', shorts: '#1d4ed8' },
-    { id: 'alan',    name: 'ALAN',      skin: '#f4c28b', hair: null,      shirt: '#111111', accent: '#eeeeee', shorts: '#111111' },
-    { id: 'thierry', name: 'THIERRY',   skin: '#6b3420', hair: null,      shirt: '#cc0000', accent: '#ffffff', shorts: '#ffffff' },
-    { id: 'lineker', name: 'LINEKER',   skin: '#f0c080', hair: '#aaaaaa', shirt: '#0033cc', accent: '#ffffff', shorts: '#0033cc' },
-    { id: 'zlatan',  name: 'ZLATAN',    skin: '#c88848', hair: '#2a1000', shirt: '#000080', accent: '#ffcc00', shorts: '#000080' },
+    { id: 'meeks',   name: 'BIG MEEKS', skin: '#5c3a1e', hair: '#1a0800', shirt: '#cc2200', accent: '#ffd43b', shorts: '#1d4ed8', trackMult: 0.85, reachMult: 0.9, chaosMult: 1.15 },
+    { id: 'alan',    name: 'ALAN',      skin: '#f4c28b', hair: null,      shirt: '#111111', accent: '#eeeeee', shorts: '#111111', trackMult: 1.0, reachMult: 1.0, chaosMult: 1.0 },
+    { id: 'thierry', name: 'THIERRY',   skin: '#6b3420', hair: null,      shirt: '#cc0000', accent: '#ffffff', shorts: '#ffffff', trackMult: 1.15, reachMult: 1.1, chaosMult: 0.85 },
+    { id: 'lineker', name: 'LINEKER',   skin: '#f0c080', hair: '#aaaaaa', shirt: '#0033cc', accent: '#ffffff', shorts: '#0033cc', trackMult: 1.0, reachMult: 1.0, chaosMult: 1.0 },
+    { id: 'zlatan',  name: 'ZLATAN',    skin: '#c88848', hair: '#2a1000', shirt: '#000080', accent: '#ffcc00', shorts: '#000080', trackMult: 1.0, reachMult: 1.0, chaosMult: 1.0 },
   ];
 
   const storageKey = 'keepy-uppy-king-v4';
@@ -76,6 +76,7 @@
     const footY = PLAYER_Y - 24;
     const dx = Math.abs(ball.x - player.x);
     
+    const reach = selectedChar.reachMult ?? 1.0;
     let touchType = null; // 'header', 'knee', 'volley', 'perfect_volley'
     let gainedPoints = 0;
     let bounceVy = 0;
@@ -84,7 +85,7 @@
     if (ball.y < PLAYER_Y - 56) {
       // HEADER ZONE
       const dy = Math.abs(ball.y - headY);
-      if (dy < 22 && dx < 32 && ball.vy > -133) {
+      if (dy < (22 * reach) && dx < (32 * reach) && ball.vy > -133) {
         touchType = 'header';
         gainedPoints = 1;
         bounceVy = -230 - Math.min(40, level * 2);
@@ -92,7 +93,7 @@
     } else if (ball.y >= PLAYER_Y - 56 && ball.y < PLAYER_Y - 34) {
       // KNEE ZONE
       const dy = Math.abs(ball.y - kneeY);
-      if (dy < 14 && dx < 45 && ball.vy > -133) {
+      if (dy < (14 * reach) && dx < (45 * reach) && ball.vy > -133) {
         touchType = 'knee';
         gainedPoints = 2;
         bounceVy = -310 - Math.min(50, level * 2.5);
@@ -100,8 +101,8 @@
     } else {
       // VOLLEY / FOOT ZONE
       const dy = Math.abs(ball.y - footY);
-      if (dy < 18 && dx < 56 && ball.vy > -133) {
-        const isPerfect = dy < 10 && dx < 27 && ball.vy > 0;
+      if (dy < (18 * reach) && dx < (56 * reach) && ball.vy > -133) {
+        const isPerfect = dy < (10 * reach) && dx < (27 * reach) && ball.vy > 0;
         touchType = isPerfect ? 'perfect_volley' : 'volley';
         gainedPoints = isPerfect ? 5 : 3;
         bounceVy = isPerfect ? -430 - Math.min(60, level * 3) : -375 - Math.min(45, level * 3);
@@ -134,7 +135,8 @@
     level = 1 + Math.floor(score / 5);
     
     const side = Math.sign(ball.x - player.x) || (Math.random() > 0.5 ? 1 : -1);
-    const chaos = Math.min(133, level * 9);
+    const chaosMult = selectedChar.chaosMult ?? 1.0;
+    const chaos = Math.min(133, level * 9) * chaosMult;
     
     ball.vy = bounceVy;
     ball.vx += side * (8 + Math.random() * 13) + (Math.random() - 0.5) * chaos;
@@ -198,7 +200,8 @@
     player.wander += (player.wanderTarget - player.wander) * Math.min(1, dt * 2.5);
 
     // Auto-tracking logic (no manual horizontal steering)
-    const autoStep = Math.max(24, 120 - level * 7) * dt;
+    const trackMult = selectedChar.trackMult ?? 1.0;
+    const autoStep = Math.max(24, 120 - level * 7) * trackMult * dt;
     const dx = (ball.x + player.wander) - player.x;
     player.x += Math.sign(dx) * Math.min(Math.abs(dx), autoStep);
     player.x = clamp(player.x, 45, W - 45);
@@ -972,7 +975,16 @@
       if (sel) { ctx.strokeStyle='#ffd43b'; ctx.lineWidth=1; ctx.strokeRect(cx+4,cy+4,cardW-8,cardH-8); }
       drawCharPortrait(cx + Math.round(cardW/2), cy+77, char);
       const lx = cx + Math.round(cardW/2) - Math.round(textWidth(char.name,9)/2);
-      pixelText(char.name, lx, cy+cardH-10, 9, '#ffffff');
+      pixelText(char.name, lx, cy+cardH-22, 9, '#ffffff');
+      
+      // Draw Pundit Traits
+      let trait = 'STANDARD BALANCE';
+      let traitColor = '#94a3b8';
+      if (char.id === 'thierry') { trait = 'PRO (+CTRL +SPEED)'; traitColor = '#65ff7a'; }
+      else if (char.id === 'meeks') { trait = 'CHAOS (+WILD KICKS)'; traitColor = '#ff6b6b'; }
+      const tx = cx + Math.round(cardW/2) - Math.round(textWidth(trait, 7)/2);
+      pixelText(trait, tx, cy+cardH-10, 7, traitColor);
+
       addClickZone(cx,cy,cardW,cardH, () => { selectedChar = char; });
     });
 
