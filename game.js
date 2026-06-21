@@ -1172,52 +1172,32 @@
   function drawInstructions() {
     panel(13, 51, W - 27, 510);
     
-    pixelText('HOW TO PLAY', W/2 - textWidth('HOW TO PLAY', 18)/2, 85, 18, '#ffd43b');
+    pixelText('HOW TO PLAY', W/2 - textWidth('HOW TO PLAY', 18)/2, 95, 18, '#ffd43b');
     
     const leftX = 27;
-    let y = 125;
+    let y = 160;
     
-    pixelText('1. BASIC KICKING', leftX, y, 10, '#41f8ff');
-    y += 16;
-    pixelText('Tap screen or press SPACEBAR when the ball', leftX, y, 8, '#ffffff');
-    y += 11;
-    pixelText('is close to the player. Only 1 tap allowed', leftX, y, 8, '#ffffff');
-    y += 11;
-    pixelText('per bounce - timing is everything!', leftX, y, 8, '#ffffff');
+    pixelText('1. BASIC KICKING', leftX, y, 11, '#41f8ff');
+    y += 20;
+    pixelText('Tap screen or press SPACEBAR when the ball', leftX, y, 9, '#ffffff');
+    y += 13;
+    pixelText('is close to the player. Only 1 tap allowed', leftX, y, 9, '#ffffff');
+    y += 13;
+    pixelText('per bounce - keep it in the air!', leftX, y, 9, '#ffffff');
     
-    y += 24;
+    y += 40;
     
-    pixelText('2. JUGGLING HEIGHT ZONES', leftX, y, 10, '#41f8ff');
-    y += 16;
-    pixelText('HEADER (High): Tap near head. (+1 pt)', leftX, y, 8, '#60a5fa');
-    y += 11;
-    pixelText('KNEE-UP (Mid): Tap at knee level. (+2 pts)', leftX, y, 8, '#fb923c');
-    y += 11;
-    pixelText('VOLLEY (Low): Tap at foot level. (+3 pts)', leftX, y, 8, '#ffd43b');
-    y += 11;
-    pixelText('PERFECT VOLLEY: Microsecond timing. (+5 pts)', leftX, y, 8, '#65ff7a');
+    pixelText('2. JUGGLING SCORING ZONES', leftX, y, 11, '#41f8ff');
+    y += 20;
+    pixelText('HEADER (High): Tap near head.   (+1 pt)', leftX, y, 9, '#60a5fa');
+    y += 13;
+    pixelText('KNEE-UP (Mid): Tap at knee level. (+2 pts)', leftX, y, 9, '#fb923c');
+    y += 13;
+    pixelText('VOLLEY (Low): Tap at foot level. (+3 pts)', leftX, y, 9, '#ffd43b');
+    y += 13;
+    pixelText('PERFECT VOLLEY: Last microsecond. (+5 pts)', leftX, y, 9, '#65ff7a');
     
-    y += 24;
-    
-    pixelText('3. LEVEL UP & CHAOS', leftX, y, 10, '#41f8ff');
-    y += 16;
-    pixelText('As score increases, gravity ramps up and', leftX, y, 8, '#ffffff');
-    y += 11;
-    pixelText('erratic knuckleball wind drifts will start.', leftX, y, 8, '#ffffff');
-    y += 11;
-    pixelText('Daylight breaks at 150 points!', leftX, y, 8, '#fef08a');
-    
-    y += 24;
-    
-    pixelText('4. HIDDEN PUNDIT SKILLS', leftX, y, 10, '#41f8ff');
-    y += 16;
-    pixelText('Every pundit has hidden stats (tracking speed,', leftX, y, 8, '#ffffff');
-    y += 11;
-    pixelText('reach size, and trajectory control).', leftX, y, 8, '#ffffff');
-    y += 11;
-    pixelText('Thierry is sharp, Big Meeks is wild!', leftX, y, 8, '#ff6b6b');
-    
-    addButton('BACK', W/2 - 50, 505, 100, 36, () => { state = 'menu'; });
+    addButton('BACK', W/2 - 50, 480, 100, 40, () => { state = 'menu'; });
   }
 
   function drawCharSelect() {
