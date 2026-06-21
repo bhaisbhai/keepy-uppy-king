@@ -1136,17 +1136,37 @@
       ctx.restore();
     }
 
-    ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(Math.round(x-15), Math.round(GROUND_Y+3), 29, 5);
+    // Round drop shadow on the pitch
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    ctx.beginPath();
+    ctx.ellipse(Math.round(x), GROUND_Y + 5, 14, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Round ball body
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(Math.round(x-r), Math.round(y-r+3), r*2, r*2-6);
-    ctx.fillRect(Math.round(x-r+3), Math.round(y-r), r*2-6, r*2);
+    ctx.beginPath();
+    ctx.arc(Math.round(x), Math.round(y), r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Classic black panels (drawn as circular spots)
     ctx.fillStyle = '#111111';
-    ctx.fillRect(Math.round(x-3),Math.round(y-3),5,5);
-    ctx.fillRect(Math.round(x-9),Math.round(y-8),5,5);
-    ctx.fillRect(Math.round(x+5),Math.round(y-7),5,5);
-    ctx.fillRect(Math.round(x-8),Math.round(y+5),5,5);
-    ctx.fillRect(Math.round(x+4),Math.round(y+6),5,5);
-    ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.strokeRect(Math.round(x-r),Math.round(y-r+3),r*2,r*2-6);
+    const rx = Math.round(x);
+    const ry = Math.round(y);
+    
+    ctx.beginPath();
+    ctx.arc(rx, ry, 2.5, 0, Math.PI * 2); // Center spot
+    ctx.arc(rx - 5, ry - 5, 2, 0, Math.PI * 2); // Top-left spot
+    ctx.arc(rx + 5, ry - 5, 2, 0, Math.PI * 2); // Top-right spot
+    ctx.arc(rx - 5, ry + 5, 2, 0, Math.PI * 2); // Bottom-left spot
+    ctx.arc(rx + 5, ry + 5, 2, 0, Math.PI * 2); // Bottom-right spot
+    ctx.fill();
+
+    // Outer outline
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(rx, ry, r, 0, Math.PI * 2);
+    ctx.stroke();
   }
 
   function drawHud() {
