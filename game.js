@@ -39,7 +39,7 @@
   let floatTexts = [];
   let unlockedMessage = '';
   let unlockedTimer = 0;
-  let player, ball, score, streak, bestRunCombo, perfects, level, earnedCoins;
+  let player, ball, score, streak, bestRunCombo, perfects, level, earnedCoins, consecutiveHeaders;
   let daylightProgress = 0;
   let cloudTimer = 0;
 
@@ -55,6 +55,7 @@
     state = 'playing';
     score = 0; streak = 0; bestRunCombo = 1; perfects = 0;
     level = 1; earnedCoins = 0; unlockedMessage = '';
+    consecutiveHeaders = 0;
     player = { x: W / 2, y: PLAYER_Y, leg: 0, face: 1, shuffle: 0,
                wander: 0, wanderTarget: 0, wanderTimer: 0, hasTap: true };
     ball = { x: W / 2 + 2, y: 387, vx: 8, vy: 16, r: 11, spin: 0, canKick: true, wobblePhase: 0 };
@@ -145,16 +146,46 @@
     const chaosMult = selectedChar.chaosMult ?? 1.0;
     const chaos = Math.min(133, level * 9) * chaosMult;
     
+    // Set vertical bounce velocity
     ball.vy = bounceVy;
-    ball.vx += side * (8 + Math.random() * 13) + (Math.random() - 0.5) * chaos;
-    ball.vx = clamp(ball.vx, -147 - level * 4, 147 + level * 4);
+    
+    // Manage consecutive headers tracking
+    if (touchType === 'header') {
+      consecutiveHeaders++;
+    } else {
+      consecutiveHeaders = 0;
+    }
+
+    // Horizontal velocity calculation: ONLY bounce away if doing 6+ headers back-to-back
+    let targetVx = ball.vx;
+    if (consecutiveHeaders >= 6) {
+      // 6+ headers back-to-back: ball flies away erratically
+      const headerExcess = consecutiveHeaders - 5;
+      const wildForce = 45 + headerExcess * 15;
+      targetVx += side * (12 + Math.random() * 15) + (Math.random() - 0.5) * wildForce;
+      
+      const maxSpeed = 200 + level * 5;
+      ball.vx = clamp(targetVx, -maxSpeed, maxSpeed);
+    } else {
+      // Normal play: keep horizontal speed low and guided back to player to ensure it is always catchable
+      const sideToPlayer = Math.sign(player.x - ball.x) || (Math.random() > 0.5 ? 1 : -1);
+      targetVx = targetVx * 0.25 + sideToPlayer * (6 + Math.random() * 14);
+      ball.vx = clamp(targetVx, -60, 60);
+    }
     
     // Set animations based on touch type
     player.face = side;
     if (touchType === 'header') {
       player.leg = -5; // head nod animation
-      addFloatText(`HEADER! +${gained}`, ball.x, ball.y - 13, '#60a5fa');
-      burst(ball.x, ball.y, '#60a5fa', 5);
+      let headerMsg = `HEADER! +${gained}`;
+      let headerColor = '#60a5fa';
+      if (consecutiveHeaders >= 6) {
+        headerMsg = `HEADER STREAK x${consecutiveHeaders}!`;
+        headerColor = '#ff4b4b';
+        shake = 1.0; // slight screen shake for visual impact
+      }
+      addFloatText(headerMsg, ball.x, ball.y - 13, headerColor);
+      burst(ball.x, ball.y, headerColor, 5);
     } else if (touchType === 'knee') {
       player.leg = 4; // knee raise animation
       addFloatText(`KNEE-UP! +${gained}`, ball.x, ball.y - 13, '#fb923c');
