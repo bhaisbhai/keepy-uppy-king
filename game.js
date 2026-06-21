@@ -1,15 +1,19 @@
 (() => {
   const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
+  let ctx = canvas.getContext('2d');
 
   const W = 360;
   const H = 640;
   
-  // Use a scale factor to lower the canvas resolution for that retro Street Fighter pixel density
-  const SCALE_FACTOR = 0.5; // 180x320 physical resolution
-  canvas.width = W * SCALE_FACTOR;
-  canvas.height = H * SCALE_FACTOR;
+  canvas.width = W;
+  canvas.height = H;
   ctx.imageSmoothingEnabled = false;
+
+  // Offscreen canvas for rendering pixelated pundits (Street Fighter style)
+  const punditCanvas = document.createElement('canvas');
+  punditCanvas.width = 40;
+  punditCanvas.height = 60;
+  const punditCtx = punditCanvas.getContext('2d');
 
   const GROUND_Y = 584;
   const PLAYER_Y = 563;
@@ -254,11 +258,6 @@
   function draw() {
     clicks = [];
     ctx.save();
-    
-    // Scale everything down to render at retro pixel resolution
-    ctx.scale(SCALE_FACTOR, SCALE_FACTOR);
-    ctx.imageSmoothingEnabled = false;
-    
     if (shake > 0.3) {
       ctx.translate(
         Math.round(Math.sin(shakePhase) * shake),
@@ -519,6 +518,35 @@
   }
 
   function drawPundit(cx, cy, char, bob, leg, face, ballX, ballY) {
+    const realCx = cx;
+    const realCy = cy;
+    
+    punditCtx.save();
+    punditCtx.clearRect(0, 0, 40, 60);
+    punditCtx.scale(0.5, 0.5); // Downscale for retro pixel density
+    
+    let offBallX = null;
+    let offBallY = null;
+    if (ballX !== null && ballY !== null) {
+      offBallX = 40 + (ballX - realCx);
+      offBallY = 90 + (ballY - realCy);
+    }
+    
+    const mainCtx = ctx;
+    ctx = punditCtx;
+    
+    drawPunditOriginal(40, 90, char, bob, leg, face, offBallX, offBallY);
+    
+    ctx = mainCtx;
+    punditCtx.restore();
+    
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(punditCanvas, realCx - 40, realCy - 90, 80, 120);
+    ctx.restore();
+  }
+
+  function drawPunditOriginal(cx, cy, char, bob, leg, face, ballX, ballY) {
     ctx.save();
     
     // Smooth shadow on the pitch
