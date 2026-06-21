@@ -332,13 +332,14 @@
         }
       }
 
-      // Billboard ads at front of stands
+      // Billboard ads at front of stands (larger and centered for legibility)
       const ads = [['GAME-BUDDY.CO.UK', '#1e3a8a', 130], ['KEEPY KING!', '#991b1b', 100], ['GAME-BUDDY.CO.UK', '#065f46', 130]];
       ads.reduce((bx, [t, c, w]) => {
         ctx.fillStyle = c;
-        ctx.fillRect(bx, 297, w, 14);
+        ctx.fillRect(bx, 293, w, 18);
         ctx.fillStyle = '#ffffff';
-        pixelText(t, bx + 8, 307, 6);
+        const fontSize = 10;
+        pixelText(t, bx + w / 2 - textWidth(t, fontSize) / 2, 306, fontSize);
         return bx + w;
       }, 0);
 
@@ -428,13 +429,14 @@
         }
       }
 
-      // Billboard ads at front of stands
+      // Billboard ads at front of stands (larger and centered for legibility)
       const ads = [['GAME-BUDDY.CO.UK', '#2563eb', 130], ['KEEPY KING!', '#dc2626', 100], ['GAME-BUDDY.CO.UK', '#16a34a', 130]];
       ads.reduce((bx, [t, c, w]) => {
         ctx.fillStyle = c;
-        ctx.fillRect(bx, 297, w, 14);
+        ctx.fillRect(bx, 293, w, 18);
         ctx.fillStyle = '#ffffff';
-        pixelText(t, bx + 8, 307, 6);
+        const fontSize = 10;
+        pixelText(t, bx + w / 2 - textWidth(t, fontSize) / 2, 306, fontSize);
         return bx + w;
       }, 0);
 
